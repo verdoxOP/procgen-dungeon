@@ -3,10 +3,12 @@ use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::io;
 
-const min_room_count: i32 = 8;
-const max_room_count: i32 = 20;
+const min_room_count: usize = 8;
+const max_room_count: usize = 20;
 const mst: i32 = 5;
 const max_attempts: i32 = 1000;
+const MIN_ROOM_WIDTH: i32 = 8;
+const MIN_ROOM_HEIGHT: i32 = 8;
 //mst == mimimum spanning tree, the minimum fastest route to the exit
 
 #[derive(Debug)]
@@ -17,7 +19,7 @@ struct Room {
     y: i32,
     id: i32,
 }
-
+//generate a room 
 fn generate_room(rng: &mut Pcg32) -> Room {
     Room {
         id:0,
@@ -63,7 +65,7 @@ fn main() {
         attempts += 1;
 
         let new_room = generate_room(&mut rng);
-
+//validate
         let overlaps = room.iter().any(|existing_room| {
             new_room.room_overlap_check(existing_room)
         });
@@ -74,6 +76,8 @@ fn main() {
             room.push(new_room);
         }
     }
+let valid = validate_rooms(&room);
+println!("rooms {}", valid);
 
     println!("Generated {} rooms in {} attempts", room.len(), attempts);
 
@@ -98,7 +102,7 @@ fn main() {
 
 
 
-
+//teken grid
 
     //vec of rooms to visualise the rooms in a grid to dubug easily
     struct Grid {
@@ -109,13 +113,13 @@ fn main() {
 
     }
     impl Grid {
-        fn new(width: i32, height: i32) -> Self {
-            Self {
+        fn constructor(width: i32, height: i32) -> Grid {
+            Grid {
                 width,
                 height,
                 chars: vec![vec!['.'; width as usize]; height as usize],
                 room: Vec::new(),
-
+                // Add a field to store the rooms
                 
             }
         }
@@ -135,11 +139,34 @@ fn main() {
             println!("{}", line);
         }
     }
-    let mut grid = Grid::new(100, 100);
+    let mut grid = Grid::constructor(100, 100);
    for existing_room in &room {
     grid.draw_room(existing_room);
 }   
     print_grid(&grid);
+
+fn validate_rooms(rooms: &[Room]) -> bool {
+  
+    if rooms.len() < min_room_count{
+println!("number of rooms is not enough, number of rooms is {}", rooms.len());
+return false;
+    }
+    
+
+for room in rooms{
+    println!("{}", room.width);
+    println!("{}", room.height);
+    if room.height < MIN_ROOM_HEIGHT|| room.width < MIN_ROOM_WIDTH{
+        println!("failed room dimensions too small");
+    return false;
+    }
+}
+    true
+
+
+
+}
+
 
 
 
