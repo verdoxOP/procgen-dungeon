@@ -11,10 +11,10 @@ func _ready() -> void:
 	z_index = 100
 
 
-# Centre on a room and zoom so the room (with its walls) fills the screen.
-# world_rect is the room in pixels, see Map.room_world_rect().
+# Centre on an area (a room or corridor) and zoom so it fills the screen.
+# world_rect is the area in pixels, see Map.room_world_rect() / corridor_world_rect().
 # visible_tiles is everything that should stay visible, see Map.visible_tiles().
-func focus_room(world_rect: Rect2, visible_tiles: Dictionary, tile_size: Vector2) -> void:
+func focus(world_rect: Rect2, visible_tiles: Dictionary, tile_size: Vector2) -> void:
 	_visible_tiles = visible_tiles
 	_tile_size = tile_size
 	position = world_rect.get_center()

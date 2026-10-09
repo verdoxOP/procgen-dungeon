@@ -8,7 +8,8 @@ const DUNGEON_PATH := "res://test_data/test_dungeon.json"
 @onready var hud: Hud = $"../Hud"
 
 var dungeon: Dungeon
-var current_room: Room
+# The Room or Corridor the camera is showing.
+var current_area: RefCounted
 
 
 func _ready() -> void:
@@ -30,20 +31,25 @@ func _ready() -> void:
 	hud.track(player)
 	spawn_pickups()
 	spawn_doors()
+	spawn_weak_walls()
+	spawn_exit()
 
 	var start_room := dungeon.get_room(dungeon.start_room_id)
 	player.position = map.map_to_local(start_room.center())
-	enter_room(start_room)
+	show_area(start_room)
 
 
-# Switch the camera when the player walks into another room.
-# On paths (outside any room) the camera stays where it is.
+# Switch the camera when the player walks into another room or corridor.
+# On normal paths the camera stays where it is.
 func _process(_delta: float) -> void:
 	if dungeon == null:
 		return
-	var room := dungeon.room_at(map.local_to_map(player.position))
-	if room != null and room != current_room:
-		enter_room(room)
+	var tile := map.local_to_map(player.position)
+	var area: RefCounted = dungeon.room_at(tile)
+	if area == null:
+		area = dungeon.corridor_at(tile)
+	if area != null and area != current_area:
+		show_area(area)
 
 
 func spawn_pickups() -> void:
@@ -68,12 +74,44 @@ func spawn_doors() -> void:
 		get_parent().add_child.call_deferred(locked_door)
 
 
-func enter_room(room: Room) -> void:
-	current_room = room
-	camera.focus_room(
-		map.room_world_rect(room),
-		map.visible_tiles(room, dungeon),
-		Vector2(map.tile_set.tile_size))
+func spawn_weak_walls() -> void:
+	for corridor in dungeon.corridors:
+		for tile in corridor.weak_walls:
+			var weak_wall := WeakWall.new()
+			weak_wall.tile = tile
+			weak_wall.position = map.map_to_local(tile)
+			weak_wall.broken.connect(_on_weak_wall_broken)
+			get_parent().add_child.call_deferred(weak_wall)
+
+
+func _on_weak_wall_broken(tile: Vector2i) -> void:
+	map.open_tile(tile)
+	# Show the corridor behind it straight away.
+	show_area(current_area)
+
+
+func spawn_exit() -> void:
+	var exit := Exit.new()
+	exit.position = map.map_to_local(dungeon.get_room(dungeon.end_room_id).center())
+	exit.used.connect(_on_exit_used)
+	get_parent().add_child.call_deferred(exit)
+
+
+# For now: start the same dungeon again. Later this asks the generator for a new seed.
+func _on_exit_used() -> void:
+	print("Dungeon complete!")
+	get_tree().reload_current_scene()
+
+
+func show_area(area: RefCounted) -> void:
+	current_area = area
+	var tile_size := Vector2(map.tile_set.tile_size)
+	if area is Room:
+		var room := area as Room
+		camera.focus(map.room_world_rect(room), map.visible_tiles(room, dungeon), tile_size)
+	elif area is Corridor:
+		var corridor := area as Corridor
+		camera.focus(map.corridor_world_rect(corridor), map.corridor_visible_tiles(corridor), tile_size)
 
 
 # Stage 1 + 2: read the JSON text and parse it.

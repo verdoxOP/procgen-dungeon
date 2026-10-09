@@ -6,22 +6,45 @@ signal stats_changed
 
 @export var speed := 80.0
 @export var max_health := 6
+# Seconds between two shots.
+@export var shoot_cooldown := 0.3
 
 var health := 3
-var ammo := 0
+var ammo := 10
 var keys: Array[String] = []
 var buffs: Array[String] = []
+
+var _cooldown_left := 0.0
 
 
 func _ready() -> void:
 	# Top-down: no floor or gravity, just slide along walls.
 	motion_mode = MOTION_MODE_FLOATING
+	# Draw above pickups, the exit and other things lying on the floor.
+	z_index = 1
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = direction * speed
 	move_and_slide()
+
+	_cooldown_left -= delta
+	if Input.is_action_pressed("shoot") and _cooldown_left <= 0.0 and ammo > 0:
+		shoot()
+
+
+# Fire an arrow towards the mouse.
+func shoot() -> void:
+	_cooldown_left = shoot_cooldown
+	ammo -= 1
+	stats_changed.emit()
+
+	var arrow := Arrow.new()
+	arrow.direction = global_position.direction_to(get_global_mouse_position())
+	arrow.damage = 2 if buffs.has("damage_up") else 1
+	arrow.global_position = global_position
+	get_parent().add_child(arrow)
 
 
 func collect(s: Spawnable) -> void:
