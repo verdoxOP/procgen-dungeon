@@ -3,11 +3,15 @@ extends CharacterBody2D
 
 # Emitted whenever health, ammo, keys or buffs change (the HUD listens to this).
 signal stats_changed
+# Emitted once when health reaches 0. The loader decides what happens next.
+signal died
 
 @export var speed := 80.0
 @export var max_health := 6
 # Seconds between two shots.
 @export var shoot_cooldown := 0.3
+# Seconds the player can't be hurt again after taking damage.
+@export var invulnerable_time := 1.0
 
 var health := 3
 var ammo := 10
@@ -15,6 +19,7 @@ var keys: Array[String] = []
 var buffs: Array[String] = []
 
 var _cooldown_left := 0.0
+var _invulnerable_left := 0.0
 
 
 func _ready() -> void:
@@ -32,6 +37,23 @@ func _physics_process(delta: float) -> void:
 	_cooldown_left -= delta
 	if Input.is_action_pressed("shoot") and _cooldown_left <= 0.0 and ammo > 0:
 		shoot()
+
+	_invulnerable_left -= delta
+
+
+# Called by enemies on contact.
+func take_damage(amount: int) -> void:
+	if _invulnerable_left > 0.0 or health <= 0:
+		return
+	_invulnerable_left = invulnerable_time
+	health = maxi(health - amount, 0)
+	stats_changed.emit()
+	# Blink while invulnerable.
+	var blink := create_tween().set_loops(5)
+	blink.tween_property(self, "modulate:a", 0.3, 0.1)
+	blink.tween_property(self, "modulate:a", 1.0, 0.1)
+	if health == 0:
+		died.emit()
 
 
 # Fire an arrow towards the mouse.

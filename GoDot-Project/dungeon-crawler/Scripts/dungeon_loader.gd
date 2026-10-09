@@ -10,6 +10,7 @@ const DUNGEON_PATH := "res://test_data/test_dungeon.json"
 var dungeon: Dungeon
 # The Room or Corridor the camera is showing.
 var current_area: RefCounted
+var enemies: Array[Enemy] = []
 
 
 func _ready() -> void:
@@ -29,7 +30,9 @@ func _ready() -> void:
 
 	map.build(dungeon)
 	hud.track(player)
+	player.died.connect(_on_player_died)
 	spawn_pickups()
+	spawn_enemies()
 	spawn_doors()
 	spawn_weak_walls()
 	spawn_exit()
@@ -55,12 +58,33 @@ func _process(_delta: float) -> void:
 func spawn_pickups() -> void:
 	for s in dungeon.spawnables:
 		if s.type == "enemy":
-			continue  # Enemies get their own step.
+			continue  # See spawn_enemies().
 		var pickup := Pickup.new()
 		pickup.spawnable = s
 		pickup.position = map.map_to_local(s.position)
 		# Main is still setting up its children during _ready(), so add it a frame later.
 		get_parent().add_child.call_deferred(pickup)
+
+
+func spawn_enemies() -> void:
+	for s in dungeon.spawnables:
+		if s.type != "enemy":
+			continue
+		var enemy := Enemy.new()
+		enemy.spawnable = s
+		enemy.target = player
+		enemy.home = dungeon.room_at(s.position)
+		if enemy.home == null:
+			enemy.home = dungeon.corridor_at(s.position)
+		enemy.position = map.map_to_local(s.position)
+		enemies.append(enemy)
+		get_parent().add_child.call_deferred(enemy)
+
+
+# For now: restart the same dungeon. Later this becomes a game-over screen.
+func _on_player_died() -> void:
+	print("Game over")
+	get_tree().reload_current_scene.call_deferred()
 
 
 # Only locked doors are spawned. An unlocked door is just an open doorway for now.
@@ -105,6 +129,10 @@ func _on_exit_used() -> void:
 
 func show_area(area: RefCounted) -> void:
 	current_area = area
+	# Only enemies in the area on screen move, like rooms in Isaac.
+	for enemy in enemies:
+		if is_instance_valid(enemy):
+			enemy.active = enemy.home == area
 	var tile_size := Vector2(map.tile_set.tile_size)
 	if area is Room:
 		var room := area as Room
