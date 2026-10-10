@@ -1,5 +1,6 @@
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
+use std::io;
 
 
 const min_room_count: usize = 8;
@@ -40,7 +41,11 @@ let new_edge = Edge{
 };
 edges.push(new_edge);
         }
+}
+edges
+}
 
+fn build_tree(edges: &[Edge], rooms: &[Room]) -> Vec<Edge>{
         let mut visited = vec![false; rooms.len()];
         visited[0] = true;
 
@@ -54,12 +59,7 @@ edges.push(new_edge);
 
         }
 
-        
-        
-
-
-}
-edges
+tree
 }
 
 
@@ -250,6 +250,7 @@ fn main() {
     }
 
     let edges: Vec<Edge> = generate_edges(&mut rng, &rooms);
+    //let tree = build_tree(&edges, &rooms);
     
     for edge in &edges {
 println!("amount of edges {:?}", edges.len())
