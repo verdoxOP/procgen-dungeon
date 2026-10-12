@@ -1,4 +1,5 @@
 mod constants;
+mod door;
 mod edge;
 mod grid;
 mod room;
@@ -12,6 +13,7 @@ use rand_pcg::Pcg32;
 use std::io;
 
 use constants::{MAP_HEIGHT, MAP_WIDTH, MAX_GENERATION_ATTEMPTS};
+use door::generate_doors;
 use edge::{Edge, generate_edges};
 use grid::{Grid, print_grid};
 use room_generation::generate_rooms;
@@ -60,12 +62,18 @@ fn main() {
         rooms = generate_rooms(&mut rng);
     }
 
+    if !validate_rooms(&rooms) {
+        println!(
+            "no valid rooms after {} generation attempts",
+            generation_attempts
+        );
+        return;
+    }
+
     let edges: Vec<Edge> = generate_edges(&mut rng, &rooms);
     //let tree = build_tree(&edges, &rooms);
 
-    for edge in &edges {
-        println!("amount of edges {:?}", edges.len())
-    }
+    println!("amount of edges {}", edges.len());
 
     let valid = validate_rooms(&rooms);
     println!(
@@ -88,5 +96,15 @@ fn main() {
 
     print_grid(&grid);
     let tree = build_tree(&edges, &rooms);
+    let doors = generate_doors(&tree, &rooms);
+
+    for door in &doors {
+        println!("{:?}", door);
+    }
+
+    // TODO: temporary end room, replace with the room bfs finds furthest from room 0
+    let end_room: usize = rooms.len() - 1;
+    println!("end room {}", end_room);
+
     visualize_tree_in_graph_form(&tree, &rooms);
 }
