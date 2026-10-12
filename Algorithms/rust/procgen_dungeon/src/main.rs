@@ -1,3 +1,4 @@
+mod bfs;
 mod constants;
 mod door;
 mod dungeon_json;
@@ -13,6 +14,7 @@ use rand::SeedableRng;
 use rand_pcg::Pcg32;
 use std::io;
 
+use bfs::{furthest_room, room_distances};
 use constants::{MAP_HEIGHT, MAP_WIDTH, MAX_GENERATION_ATTEMPTS};
 use door::generate_doors;
 use dungeon_json::write_dungeon_json;
@@ -104,11 +106,15 @@ fn main() {
         println!("{:?}", door);
     }
 
-    // TODO: temporary end room, replace with the room bfs finds furthest from room 0
-    let end_room: usize = rooms.len() - 1;
+    let start_room: usize = 0;
+    let distances = room_distances(&doors, rooms.len(), start_room);
+    for room in 0..distances.len() {
+        println!("room {} distance {}", room, distances[room]);
+    }
+
+    let end_room = furthest_room(&distances);
     println!("end room {}", end_room);
 
-    let start_room: usize = 0;
     write_dungeon_json(game_seed, &rooms, &doors, start_room, end_room);
 
     visualize_tree_in_graph_form(&tree, &rooms);
