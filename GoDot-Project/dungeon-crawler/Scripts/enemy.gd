@@ -18,7 +18,7 @@ const DEFAULT_KIND := "skeleton"
 # Set before adding the enemy to the scene.
 var spawnable: Spawnable
 var target: Player
-# The Room or Corridor the enemy was spawned in.
+# The Room the enemy was spawned in.
 var home: RefCounted
 # Only moves while the camera shows the enemy's home area.
 var active := false
@@ -132,6 +132,7 @@ func take_hit(damage: int) -> void:
 
 func die() -> void:
 	_dead = true
+	spawnable.gone = true
 	# Stop blocking the player and arrows while the death animation plays.
 	# Deferred, because this runs inside the arrow's collision callback.
 	set_deferred("collision_layer", 0)

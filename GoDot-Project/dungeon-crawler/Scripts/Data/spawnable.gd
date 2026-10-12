@@ -12,6 +12,9 @@ var buff: String       # buff
 var enemy: String      # enemy
 var behaviour: String  # enemy
 
+# Set when picked up or killed, so it doesn't come back when the room loads again.
+var gone := false
+
 
 static func from_dict(d: Dictionary) -> Spawnable:
 	var s := Spawnable.new()

@@ -30,4 +30,5 @@ func _ready() -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if body is Player:
 		body.collect(spawnable)
+		spawnable.gone = true
 		queue_free()

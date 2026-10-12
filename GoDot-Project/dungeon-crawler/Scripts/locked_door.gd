@@ -46,6 +46,8 @@ func _process(_delta: float) -> void:
 
 func unlock() -> void:
 	_player.use_key(door.key_id)
+	# Shared by both rooms, so the door stays open from the other side too.
+	door.locked = false
 	hud().hide_prompt()
 	queue_free()
 

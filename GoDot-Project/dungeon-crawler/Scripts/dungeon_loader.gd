@@ -8,9 +8,12 @@ const DUNGEON_PATH := "res://test_data/test_dungeon.json"
 @onready var hud: Hud = $"../Hud"
 
 var dungeon: Dungeon
-# The Room or Corridor the camera is showing.
-var current_area: RefCounted
-var enemies: Array[Enemy] = []
+# The Room the player is in. Every room is its own screen.
+var current_room: Room
+# Holds everything spawned for the current room, so leaving the room frees it all at once.
+var room_nodes: Node2D
+# True between walking into a door and the next room being loaded.
+var _switching := false
 
 
 func _ready() -> void:
@@ -28,57 +31,71 @@ func _ready() -> void:
 		print("  Room %d at %s, size %s, center %s" % [
 			room.id, room.rect.position, room.rect.size, room.center()])
 
-	map.build(dungeon)
+	var start_room := dungeon.get_room(dungeon.start_room_id)
+	if start_room == null:
+		push_error("Start room %d does not exist" % dungeon.start_room_id)
+		return
+
 	hud.track(player)
 	player.died.connect(_on_player_died)
+	# Main is still setting up its children during _ready(), so load the room a frame later.
+	enter_room.call_deferred(start_room, start_room.center())
+
+
+# Stage 7: load a room. Builds its tiles, spawns what's in it and moves the player
+# to `arrive` (a tile). Stuff that was picked up or killed stays gone.
+func enter_room(room: Room, arrive: Vector2i) -> void:
+	current_room = room
+	if room_nodes != null:
+		# Out of the tree right away: rooms can touch, so an old doorway could sit
+		# exactly where the player arrives and send them straight back.
+		get_parent().remove_child(room_nodes)
+		room_nodes.queue_free()
+	room_nodes = Node2D.new()
+	get_parent().add_child(room_nodes)
+	# Arrows still flying in the old room would hit things in the new one.
+	for child in get_parent().get_children():
+		if child is Arrow:
+			child.queue_free()
+
+	map.build_room(room, dungeon)
 	spawn_pickups()
 	spawn_enemies()
 	spawn_doors()
-	spawn_weak_walls()
 	spawn_exit()
 
-	var start_room := dungeon.get_room(dungeon.start_room_id)
-	player.position = map.map_to_local(start_room.center())
-	show_area(start_room)
+	player.position = map.map_to_local(arrive)
+	player.velocity = Vector2.ZERO
+	camera.focus(map.room_world_rect(room), map.visible_tiles(room), Vector2(map.tile_set.tile_size))
+	_switching = false
 
 
-# Switch the camera when the player walks into another room or corridor.
-# On normal paths the camera stays where it is.
-func _process(_delta: float) -> void:
-	if dungeon == null:
-		return
-	var tile := map.local_to_map(player.position)
-	var area: RefCounted = dungeon.room_at(tile)
-	if area == null:
-		area = dungeon.corridor_at(tile)
-	if area != null and area != current_area:
-		show_area(area)
+func in_current_room(s: Spawnable) -> bool:
+	return not s.gone and dungeon.room_at(s.position) == current_room
 
 
 func spawn_pickups() -> void:
 	for s in dungeon.spawnables:
-		if s.type == "enemy":
-			continue  # See spawn_enemies().
+		if s.type == "enemy" or not in_current_room(s):
+			continue  # Enemies: see spawn_enemies().
 		var pickup := Pickup.new()
 		pickup.spawnable = s
 		pickup.position = map.map_to_local(s.position)
-		# Main is still setting up its children during _ready(), so add it a frame later.
-		get_parent().add_child.call_deferred(pickup)
+		room_nodes.add_child(pickup)
 
 
 func spawn_enemies() -> void:
 	for s in dungeon.spawnables:
-		if s.type != "enemy":
+		if s.type != "enemy" or not in_current_room(s):
 			continue
 		var enemy := Enemy.new()
 		enemy.spawnable = s
 		enemy.target = player
-		enemy.home = dungeon.room_at(s.position)
-		if enemy.home == null:
-			enemy.home = dungeon.corridor_at(s.position)
+		enemy.home = current_room
+		# Only the room on screen exists, so its enemies are always active.
+		enemy.active = true
 		enemy.position = map.map_to_local(s.position)
-		enemies.append(enemy)
-		get_parent().add_child.call_deferred(enemy)
+		room_nodes.add_child(enemy)
 
 
 # For now: restart the same dungeon. Later this becomes a game-over screen.
@@ -87,59 +104,56 @@ func _on_player_died() -> void:
 	get_tree().reload_current_scene.call_deferred()
 
 
-# Only locked doors are spawned. An unlocked door is just an open doorway for now.
+# Every door and corridor of this room gets a Doorway that loads the other room.
+# Locked doors and unbroken weak walls sit on top of it and block it until opened.
 func spawn_doors() -> void:
-	for connection in dungeon.connections:
-		if connection.door == null or not connection.door.locked:
-			continue
-		var locked_door := LockedDoor.new()
-		locked_door.door = connection.door
-		locked_door.position = map.map_to_local(connection.door.position)
-		get_parent().add_child.call_deferred(locked_door)
+	for opening in dungeon.openings(current_room.id):
+		var passage = opening.passage
+		var doorway := Doorway.new()
+		doorway.opening = opening
+		doorway.position = map.map_to_local(opening.tile)
+		doorway.entered.connect(_on_doorway_entered)
+		room_nodes.add_child(doorway)
 
-
-func spawn_weak_walls() -> void:
-	for corridor in dungeon.corridors:
-		for tile in corridor.weak_walls:
+		if passage is Door and passage.locked:
+			var locked_door := LockedDoor.new()
+			locked_door.door = passage
+			locked_door.position = map.map_to_local(opening.tile)
+			room_nodes.add_child(locked_door)
+		elif passage is Corridor and not passage.opened:
 			var weak_wall := WeakWall.new()
-			weak_wall.tile = tile
-			weak_wall.position = map.map_to_local(tile)
-			weak_wall.broken.connect(_on_weak_wall_broken)
-			get_parent().add_child.call_deferred(weak_wall)
+			weak_wall.tile = opening.tile
+			weak_wall.position = map.map_to_local(opening.tile)
+			weak_wall.broken.connect(_on_weak_wall_broken.bind(passage))
+			room_nodes.add_child(weak_wall)
 
 
-func _on_weak_wall_broken(tile: Vector2i) -> void:
+func _on_doorway_entered(opening: Dictionary) -> void:
+	if _switching or opening.from != current_room.id:
+		return
+	_switching = true
+	# This runs inside a physics callback, so swap the room afterwards.
+	enter_room.call_deferred(dungeon.get_room(opening.to), opening.arrive)
+
+
+func _on_weak_wall_broken(tile: Vector2i, corridor: Corridor) -> void:
+	corridor.opened = true
 	map.open_tile(tile)
-	# Show the corridor behind it straight away.
-	show_area(current_area)
 
 
 func spawn_exit() -> void:
+	if current_room.id != dungeon.end_room_id:
+		return
 	var exit := Exit.new()
-	exit.position = map.map_to_local(dungeon.get_room(dungeon.end_room_id).center())
+	exit.position = map.map_to_local(current_room.center())
 	exit.used.connect(_on_exit_used)
-	get_parent().add_child.call_deferred(exit)
+	room_nodes.add_child(exit)
 
 
 # For now: start the same dungeon again. Later this asks the generator for a new seed.
 func _on_exit_used() -> void:
 	print("Dungeon complete!")
 	get_tree().reload_current_scene()
-
-
-func show_area(area: RefCounted) -> void:
-	current_area = area
-	# Only enemies in the area on screen move, like rooms in Isaac.
-	for enemy in enemies:
-		if is_instance_valid(enemy):
-			enemy.active = enemy.home == area
-	var tile_size := Vector2(map.tile_set.tile_size)
-	if area is Room:
-		var room := area as Room
-		camera.focus(map.room_world_rect(room), map.visible_tiles(room, dungeon), tile_size)
-	elif area is Corridor:
-		var corridor := area as Corridor
-		camera.focus(map.corridor_world_rect(corridor), map.corridor_visible_tiles(corridor), tile_size)
 
 
 # Stage 1 + 2: read the JSON text and parse it.
