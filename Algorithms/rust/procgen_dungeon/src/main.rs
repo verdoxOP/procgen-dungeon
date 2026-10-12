@@ -2,7 +2,6 @@ use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::io;
 
-
 const min_room_count: usize = 8;
 const max_room_count: usize = 20;
 const mst: i32 = 5;
@@ -24,60 +23,66 @@ struct Room {
     y: i32,
     id: usize,
 }
-#[derive(Debug)]
-struct Edge{
-    weight:i32,
-    Ivertex1:usize,
-    Ivertex2:usize,
+#[derive(Debug, Clone)]
+struct Edge {
+    weight: i32,
+    Ivertex1: usize,
+    Ivertex2: usize,
 }
-fn generate_edges(rng: &mut Pcg32, rooms: &[Room]) -> Vec<Edge>{
-let mut edges: Vec<Edge> = Vec::new();
-for i in 0..rooms.len() {
+fn generate_edges(rng: &mut Pcg32, rooms: &[Room]) -> Vec<Edge> {
+    let mut edges: Vec<Edge> = Vec::new();
+    for i in 0..rooms.len() {
         for j in (i + 1)..rooms.len() {
-let new_edge = Edge{
-    weight : rng.random_range(1..=100),
-    Ivertex1: i,
-    Ivertex2: j,
-};
-edges.push(new_edge);
+            let new_edge = Edge {
+                weight: rng.random_range(1..=100),
+                Ivertex1: i,
+                Ivertex2: j,
+            };
+            edges.push(new_edge);
         }
+    }
+    edges
 }
-edges
-}
 
-fn build_tree(edges: &[Edge], rooms: &[Room]) -> Vec<Edge>{
-        let mut visited = vec![false; rooms.len()];
-        visited[0] = true;
+fn build_tree(edges: &[Edge], rooms: &[Room]) -> Vec<Edge> {
+    let mut visited = vec![false; rooms.len()];
+    visited[0] = true;
 
-
-        let mut tree: Vec<Edge> = Vec::new();
-        while tree.len() < rooms.len() - 1{
-            let mut index_edges: usize;
-            let mut weight:i32 = 70;
-            
-
-
+    let mut tree: Vec<Edge> = Vec::new();
+    while tree.len() < rooms.len() - 1 {
+        let mut index_edges: usize = 0;
+        let mut weight: i32 = 101;
+        for (index_edges_new, edge) in edges.iter().enumerate() {
+            if visited[edge.Ivertex1] ^ visited[edge.Ivertex2] {
+                if edge.weight < weight {
+                    weight = edge.weight;
+                    index_edges = index_edges_new;
+                }
+            }
         }
+        for edge in edges.iter().take(index_edges + 1).skip(index_edges) {
+            let edge = &edges[index_edges];
+            visited[edge.Ivertex1] = true;
+            visited[edge.Ivertex2] = true;
+        }
+        tree.push(edges[index_edges].clone());
+    }
 
-tree
+    tree
 }
-
-
-
-
 
 /*
 Outer loop: keep repeating while tree.len() is smaller than rooms.len() - 1. Look up while loops in Rust for this.
-Before searching, inside the outer loop: make two variables to remember the best edge found so far: one for its index in edges (a usize) and one for its weight (an i32). Start the weight at something higher than any real weight, so the first valid edge always beats it. Your weights go up to 100, so think about what start value works.
+Before searching, inside the outer loop: make two variables to remember the best edge found so far:
+one for its index in edges (a usize) and one for its weight (an i32).
+Start the weight at something higher than any real weight, so the first valid edge always beats it.
+Your weights go up to 100, so think about what start value works.
 Inner loop: go through every edge in edges, keeping track of each edge’s index.
 Skip the edge unless exactly one of its two rooms is visited. Hint: compare visited[...] for Ivertex1 and Ivertex2. When are two bools “exactly one true”?
 If it passes, and its weight is lower than the best weight so far, save its index and weight.
 After the inner loop: you have the index of the cheapest valid edge.
 Mark both of its rooms as visited. One is already true, and setting it again is harmless, so you don’t have to work out which one is new.
 Push that edge into tree. */
-
-
-
 
 //generate a room
 fn generate_room(rng: &mut Pcg32) -> Room {
@@ -91,25 +96,21 @@ fn generate_room(rng: &mut Pcg32) -> Room {
         x: rng.random_range(0..=MAP_WIDTH - width),
         y: rng.random_range(0..=MAP_HEIGHT - height),
     }
-    
 }
-
-
 
 fn generate_rooms(rng: &mut Pcg32) -> Vec<Room> {
     let room_count = rng.random_range(min_room_count..=max_room_count);
     let mut rooms: Vec<Room> = Vec::new();
     let mut attempts = 0;
-    
 
     while rooms.len() < room_count && attempts < max_attempts {
         attempts += 1;
 
         let new_room = generate_room(rng);
         //validate
-        let overlaps = rooms.iter().any(|existing_room| {
-            new_room.room_overlap_check(existing_room)
-        });
+        let overlaps = rooms
+            .iter()
+            .any(|existing_room| new_room.room_overlap_check(existing_room));
 
         if !overlaps {
             let mut new_room = new_room;
@@ -121,8 +122,6 @@ fn generate_rooms(rng: &mut Pcg32) -> Vec<Room> {
     println!("Generated {} rooms in {} attempts", rooms.len(), attempts);
     rooms
 }
-
-
 
 impl Room {
     fn room_overlap_check(&self, other: &Room) -> bool {
@@ -136,11 +135,7 @@ impl Room {
             || self.y >= other_bottom
             || self_bottom <= other.y)
     }
-
-    
 }
-
-
 
 //teken grid
 
@@ -183,7 +178,10 @@ fn print_grid(grid: &Grid) {
 
 fn validate_rooms(rooms: &[Room]) -> bool {
     if rooms.len() < min_room_count {
-        println!("number of rooms is not enough, number of rooms is {}", rooms.len());
+        println!(
+            "number of rooms is not enough, number of rooms is {}",
+            rooms.len()
+        );
         return false;
     }
 
@@ -251,13 +249,16 @@ fn main() {
 
     let edges: Vec<Edge> = generate_edges(&mut rng, &rooms);
     //let tree = build_tree(&edges, &rooms);
-    
+
     for edge in &edges {
-println!("amount of edges {:?}", edges.len())
+        println!("amount of edges {:?}", edges.len())
     }
 
     let valid = validate_rooms(&rooms);
-    println!("rooms {} after {} generation attempts", valid, generation_attempts);
+    println!(
+        "rooms {} after {} generation attempts",
+        valid, generation_attempts
+    );
 
     for i in 0..rooms.len() {
         println!("Checking room {}", rooms[i].id);
