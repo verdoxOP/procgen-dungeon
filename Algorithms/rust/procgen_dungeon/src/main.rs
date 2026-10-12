@@ -1,5 +1,6 @@
 mod constants;
 mod door;
+mod dungeon_json;
 mod edge;
 mod grid;
 mod room;
@@ -14,6 +15,7 @@ use std::io;
 
 use constants::{MAP_HEIGHT, MAP_WIDTH, MAX_GENERATION_ATTEMPTS};
 use door::generate_doors;
+use dungeon_json::write_dungeon_json;
 use edge::{Edge, generate_edges};
 use grid::{Grid, print_grid};
 use room_generation::generate_rooms;
@@ -105,6 +107,9 @@ fn main() {
     // TODO: temporary end room, replace with the room bfs finds furthest from room 0
     let end_room: usize = rooms.len() - 1;
     println!("end room {}", end_room);
+
+    let start_room: usize = 0;
+    write_dungeon_json(game_seed, &rooms, &doors, start_room, end_room);
 
     visualize_tree_in_graph_form(&tree, &rooms);
 }

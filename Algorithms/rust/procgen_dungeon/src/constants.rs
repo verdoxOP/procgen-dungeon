@@ -9,4 +9,5 @@ pub const MAX_ROOM_WIDTH: i32 = 20;
 pub const MAX_ROOM_HEIGHT: i32 = 20;
 pub const MAP_WIDTH: i32 = 100;
 pub const MAP_HEIGHT: i32 = 100;
+pub const FORMAT_VERSION: i32 = 2;
 //mst == mimimum spanning tree, the minimum fastest route to the exit

@@ -1,8 +1,10 @@
 use crate::edge::Edge;
 use crate::room::Room;
+use serde::Serialize;
 
 //which side of a room a door is on, an enum so a typo is a compile error instead of a bug in godot
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Wall {
     Top,
     Bottom,
@@ -11,11 +13,16 @@ pub enum Wall {
 }
 
 //a door connects two rooms from the tree, with the wall it sits on in each room
-#[derive(Debug)]
+//the renames give the json keys godot expects without renaming the rust fields
+#[derive(Debug, Serialize)]
 pub struct Door {
+    #[serde(rename = "from")]
     pub room_a: usize,
+    #[serde(rename = "to")]
     pub room_b: usize,
+    #[serde(rename = "from_wall")]
     pub wall_a: Wall,
+    #[serde(rename = "to_wall")]
     pub wall_b: Wall,
 }
 
