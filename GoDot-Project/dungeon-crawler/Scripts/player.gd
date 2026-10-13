@@ -29,6 +29,19 @@ func _ready() -> void:
 	z_index = 1
 
 
+# Stats taken to the next floor. Keys only open doors on their own floor.
+func snapshot() -> Dictionary:
+	return {"health": health, "ammo": ammo, "buffs": buffs.duplicate()}
+
+
+func restore(stats: Dictionary) -> void:
+	if stats.is_empty():
+		return
+	health = stats["health"]
+	ammo = stats["ammo"]
+	buffs.assign(stats["buffs"])
+
+
 func _physics_process(delta: float) -> void:
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = direction * speed

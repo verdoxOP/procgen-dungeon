@@ -1,6 +1,7 @@
 extends Node
 
-const DUNGEON_PATH := "res://test_data/test_dungeon.json"
+const MENU_SCENE := "res://Scenes/menu.tscn"
+const FORMAT_VERSION := 2
 
 @onready var map: Map = $"../Map"
 @onready var camera: RoomCamera = $"../Camera2D"
@@ -17,7 +18,7 @@ var _switching := false
 
 
 func _ready() -> void:
-	var data := load_dungeon(DUNGEON_PATH)
+	var data := load_dungeon()
 	if data.is_empty():
 		return
 
@@ -33,10 +34,15 @@ func _ready() -> void:
 
 	var start_room := dungeon.get_room(dungeon.start_room_id)
 	if start_room == null:
-		push_error("Start room %d does not exist" % dungeon.start_room_id)
+		fail("Start room %d does not exist." % dungeon.start_room_id)
 		return
 
+	player.restore(GameSettings.carried)
 	hud.track(player)
+	hud.show_info(GameSettings.last_info)
+	hud.retry_pressed.connect(_on_retry)
+	hud.new_seed_pressed.connect(_on_new_seed)
+	hud.menu_pressed.connect(_on_menu)
 	player.died.connect(_on_player_died)
 	# Main is still setting up its children during _ready(), so load the room a frame later.
 	enter_room.call_deferred(start_room, start_room.center())
@@ -98,10 +104,35 @@ func spawn_enemies() -> void:
 		room_nodes.add_child(enemy)
 
 
-# For now: restart the same dungeon. Later this becomes a game-over screen.
 func _on_player_died() -> void:
-	print("Game over")
-	get_tree().reload_current_scene.call_deferred()
+	hud.show_game_over(GameSettings.floor_number)
+	get_tree().paused = true
+
+
+func _on_retry() -> void:
+	GameSettings.retry()
+	restart()
+
+
+func _on_new_seed() -> void:
+	GameSettings.new_run(GameSettings.generator, GameSettings.random_seed())
+	restart()
+
+
+func _on_menu() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file(MENU_SCENE)
+
+
+func restart() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+
+# Esc goes back to the menu.
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and not get_tree().paused:
+		_on_menu()
 
 
 # Every door and corridor of this room gets a Doorway that loads the other room.
@@ -150,30 +181,64 @@ func spawn_exit() -> void:
 	room_nodes.add_child(exit)
 
 
-# For now: start the same dungeon again. Later this asks the generator for a new seed.
+# Next floor: a new dungeon from the same generator, keeping the player's stats.
 func _on_exit_used() -> void:
-	print("Dungeon complete!")
-	get_tree().reload_current_scene()
+	GameSettings.next_floor(player.snapshot())
+	get_tree().reload_current_scene.call_deferred()
 
 
-# Stage 1 + 2: read the JSON text and parse it.
-# Returns an empty Dictionary on failure.
-func load_dungeon(path: String) -> Dictionary:
-	if not FileAccess.file_exists(path):
-		push_error("Dungeon file not found: %s" % path)
+# Stage 1 + 2: get the JSON text (generator or test file) and parse it.
+# Returns an empty Dictionary on failure, after sending the player back to the menu.
+func load_dungeon() -> Dictionary:
+	var text := ""
+	var process_ms := -1.0
+	if GameSettings.generator == GameSettings.TEST_GENERATOR:
+		var path := GameSettings.TEST_DUNGEON_PATH
+		text = FileAccess.get_file_as_string(path)
+		if text.is_empty():
+			fail("Could not read %s (%s)." % [path, error_string(FileAccess.get_open_error())])
+			return {}
+	else:
+		var result := GeneratorRunner.run(GameSettings.generator, GameSettings.dungeon_seed)
+		if result.has("error"):
+			fail(result["error"])
+			return {}
+		text = result["text"]
+		process_ms = result["process_ms"]
+
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		fail("%s did not output valid JSON (line %d: %s)." % [
+			GameSettings.generator, json.get_error_line(), json.get_error_message()])
 		return {}
-
-	var text := FileAccess.get_file_as_string(path)
-	if text.is_empty():
-		push_error("Could not read dungeon file: %s (%s)" % [path, error_string(FileAccess.get_open_error())])
-		return {}
-
-	var data = JSON.parse_string(text)
-	if data == null:
-		push_error("Dungeon file is not valid JSON: %s" % path)
-		return {}
+	var data = json.data
 	if not data is Dictionary:
-		push_error("Dungeon JSON must be an object at the top level: %s" % path)
+		fail("The dungeon JSON must be an object at the top level.")
+		return {}
+	if int(data.get("format_version", 0)) != FORMAT_VERSION:
+		fail("Unsupported format_version %s (expected %d)." % [data.get("format_version"), FORMAT_VERSION])
+		return {}
+	if data.get("rooms", []).is_empty():
+		fail("The dungeon has no rooms.")
 		return {}
 
+	GameSettings.last_info = describe(data, process_ms)
 	return data
+
+
+# One line for the HUD and menu, e.g. "Floor 2 · rust · seed 1234 · 4.8 ms (process 31 ms)".
+func describe(data: Dictionary, process_ms: float) -> String:
+	var stats = data.get("stats")
+	var total = stats.get("total_ms") if stats is Dictionary else null
+	var timing := "%.2f ms" % float(total) if total != null else "no stats"
+	if process_ms >= 0.0:
+		timing += " (process %.0f ms)" % process_ms
+	return "Floor %d  ·  %s  ·  seed %d  ·  %s" % [
+		GameSettings.floor_number, GameSettings.generator, int(data.get("seed", 0)), timing]
+
+
+# Back to the menu with the reason. Deferred, because this can run during _ready().
+func fail(message: String) -> void:
+	push_error(message)
+	GameSettings.last_error = message
+	get_tree().change_scene_to_file.call_deferred(MENU_SCENE)
