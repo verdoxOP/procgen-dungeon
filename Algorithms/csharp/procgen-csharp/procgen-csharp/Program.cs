@@ -1,6 +1,7 @@
 using procgen_csharp;
 
 // Command-line contract: procgen-csharp --seed <int>
+// stdout is reserved for the dungeon JSON, so all logging goes to stderr.
 // Exit code 2 = invalid arguments.
 if (args.Length != 2 || args[0] != "--seed" || !ulong.TryParse(args[1], out ulong seed))
 {
@@ -10,10 +11,10 @@ if (args.Length != 2 || args[0] != "--seed" || !ulong.TryParse(args[1], out ulon
 
 var rng = Pcg32.FromSeed(seed);
 
-// For now: show that the seed works. The next steps replace this with the generator.
-for (int i = 0; i < 5; i++)
+List<Room> rooms = RoomGeneration.GenerateRooms(rng);
+foreach (Room room in rooms)
 {
-    Console.Error.WriteLine($"random_range(8..=20): {rng.RandomRange(8, 20)}");
+    Console.Error.WriteLine(room);
 }
 
 return 0;
