@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://cbbk4orxdvom2"]
+
+[ext_resource type="Script" uid="uid://c4b8njafyaj5s" path="res://Scripts/player.gd" id="1_cvnsp"]
+[ext_resource type="Texture2D" uid="uid://dfcaot2ydwf8b" path="res://Assets/char animation/priest1_v1_1.png" id="2_fkybt"]
+[ext_resource type="Texture2D" uid="uid://p5o2trs5lsp7" path="res://Assets/char animation/priest1_v1_2.png" id="3_x3wgy"]
+[ext_resource type="Texture2D" uid="uid://g71p6n8ux0sw" path="res://Assets/char animation/priest1_v1_3.png" id="4_3smsa"]
+[ext_resource type="Texture2D" uid="uid://0llaggqg666i" path="res://Assets/char animation/priest1_v1_4.png" id="5_8erm5"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wmnx4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_fkybt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_x3wgy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_3smsa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_8erm5")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wmnx4"]
+size = Vector2(12, 12)
+
+[node name="Player" type="CharacterBody2D" unique_id=639564968]
+script = ExtResource("1_cvnsp")
+
+[node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=466349454]
+sprite_frames = SubResource("SpriteFrames_wmnx4")
+autoplay = "default"
+frame_progress = 0.31069285
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2028399612]
+shape = SubResource("RectangleShape2D_wmnx4")

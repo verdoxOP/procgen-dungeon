@@ -1,3 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Generator programs are build output (cargo / dotnet), copied in by hand.
+generators/*
+!generators/.gdignore
