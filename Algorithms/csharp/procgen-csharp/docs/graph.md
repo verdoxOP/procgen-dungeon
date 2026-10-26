@@ -2,7 +2,7 @@
 
 [← Documentation home](README.md)
 
-Covers [`Edge.cs`](../procgen-csharp/Edge.cs) and [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs). The backbone (Prim's algorithm) will be added here once it is ported.
+Covers [`Edge.cs`](../procgen-csharp/Edge.cs), [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs) and [`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs).
 
 Graph theory background (vertices, edges, trees, spanning trees, Prim vs Kruskal) and a worked example by hand are in [Rust → Graph and backbone](../../../rust/procgen_dungeon/docs/graph.md) and [Rust → Theory](../../../rust/procgen_dungeon/docs/theory.md).
 
@@ -52,8 +52,37 @@ Rooms are separate screens, so any two rooms could share a door; and because the
 
 ### Weight range constants
 
-In Rust the range `1..=100` is written directly in `edge.rs`, and `tree.rs` uses `101` as its starting "cheapest weight". In C# the range is named: [`EdgeGeneration.MinWeight` and `MaxWeight`](../procgen-csharp/EdgeGeneration.cs#L7-L8). When Prim is ported it can use `MaxWeight + 1` instead of a magic `101`, so the two can't get out of sync.
+In Rust the range `1..=100` is written directly in `edge.rs`, and `tree.rs` uses `101` as its starting "cheapest weight". In C# the range is named: [`EdgeGeneration.MinWeight` and `MaxWeight`](../procgen-csharp/EdgeGeneration.cs#L7-L8). Prim doesn't need a `101` at all (see below), so the two can't get out of sync.
 
-## Backbone: Prim's algorithm
+## Backbone: Prim's algorithm ([`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs))
 
-⏳ Next step. Rust: [`tree.rs`](../../../rust/procgen_dungeon/src/tree.rs).
+### `BuildTree(edges, roomCount)` ([L8–40](../procgen-csharp/SpanningTree.cs#L8-L40))
+
+Builds a **spanning tree** over the complete graph. Its edges become the doors: the **backbone** of the dungeon. Same steps as [`tree.rs`](../../../rust/procgen_dungeon/src/tree.rs):
+
+1. Room `0` is visited ([L11](../procgen-csharp/SpanningTree.cs#L11)).
+2. Until the tree has `roomCount − 1` edges ([L14](../procgen-csharp/SpanningTree.cs#L14)):
+   - go through **all** edges in list order and keep the cheapest one where **exactly one** end is visited ([L19–26](../procgen-csharp/SpanningTree.cs#L19-L26)); that is an edge from the part of the dungeon already connected to a new room. `visited[a] ^ visited[b]` (xor) is `true` only when one side is visited and the other isn't,
+   - mark both ends visited and add the edge to the tree ([L34–36](../procgen-csharp/SpanningTree.cs#L34-L36)).
+
+The result: every room is reachable, there are no cycles, and there is exactly one path between any two rooms. Seed 42: 18 rooms → 17 tree edges, out of 153 candidates.
+
+Prim draws **no random numbers**; it only uses the weights. Because the weights and their order are identical to Rust, the tree is too.
+
+### Tie-break
+
+Weights only go from 1 to 100, so equal weights are common: 87 of the first 100 seeds have a tree with at least two edges of the same weight. When two candidate edges are equally cheap, the **first one in the edge list wins**, because only a strictly lower weight (`<`) replaces the current choice ([L22](../procgen-csharp/SpanningTree.cs#L22)). This is the same rule as in Rust, and it matters: `<=` would pick the last one and could build a different tree. See [Rust → Design decisions → Tie-breaking](../../../rust/procgen_dungeon/docs/design-decisions.md#tie-breaking).
+
+### Differences from `tree.rs` (same result)
+
+| `tree.rs` | C# | Why |
+|---|---|---|
+| starts the search with `weight = 101` and `index_edges = 0` | starts with "no edge yet" (`cheapest = null`) | no magic number that has to stay above `MaxWeight`; picks the same edge |
+| marks the chosen edge visited inside a loop that runs exactly once ([L20–24](../../../rust/procgen_dungeon/src/tree.rs#L20-L24)) | two plain assignments | same effect, easier to read (the Rust loop is in its known issues) |
+| if no crossing edge is found, pushes edge 0 again | throws `InvalidOperationException` ([L29–32](../procgen-csharp/SpanningTree.cs#L29-L32)) | can't happen on a complete graph; if it ever did, failing loudly beats a silently wrong tree |
+| `rooms.len() − 1` underflows with 0 rooms | `int`, the loop just doesn't run | can't happen after validation (at least 8 rooms) |
+| takes the rooms list | takes `roomCount` | Prim only needs the number of rooms |
+
+### Complexity
+
+Each of the `n − 1` steps scans all `n · (n − 1) / 2` edges: O(n³) on a complete graph. At 20 rooms that is 19 × 190 ≈ 3600 edge checks, which is nothing. A priority queue would only be worth it for much larger dungeons; keeping the same simple version as Rust keeps the comparison fair.

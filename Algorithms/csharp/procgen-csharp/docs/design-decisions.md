@@ -47,17 +47,17 @@ Legend: ✅ decided · ❓ open
 
 ## Command-line contract
 
-| Rust (current) | C# |
-|---|---|
-| seed from stdin (`Enter a seed for the game:`) | `--seed <int>` argument |
-| logs on stdout | logs on stderr |
-| `dungeon.json` file | JSON on stdout (planned) |
+| Rust before 26 Oct (commit 5eeafce) | Rust now | C# |
+|---|---|---|
+| seed from stdin (`Enter a seed for the game:`) | `--seed <int>` argument | `--seed <int>` argument |
+| logs on stdout | logs on stderr | logs on stderr |
+| `dungeon.json` file | JSON on stdout | JSON on stdout (planned) |
 
 | | Decision |
 |---|---|
 | ✅ | **Follow the contract the Godot game expects from every generator.** |
 
-**Why:** the game runs generators with `OS.execute()` and reads the JSON from stdout. Following the contract from the start means the C# generator can be dropped into the game's `generators/` folder without changes. The Rust generator still has to be updated to the contract (on the team board).
+**Why:** the game runs generators with `OS.execute()` and reads the JSON from stdout. Following the contract from the start means the C# generator can be dropped into the game's `generators/` folder without changes. Since commit `5eeafce` (26 Oct) the Rust generator follows the same contract.
 
 ## Exit code on failure
 
@@ -65,7 +65,7 @@ Legend: ✅ decided · ❓ open
 |---|---|
 | ✅ | **Exit with code 1 when no valid rooms are found after `MaxGenerationAttempts`.** |
 
-Rust currently continues with the invalid room set (in its known issues). The contract says exit 1 = generation failed, so the game can show an error instead of loading a broken dungeon. This doesn't change any dungeon that *is* valid, so the comparison stays fair.
+The contract says exit 1 = generation failed, so the game can show an error instead of loading a broken dungeon. Rust used to continue with the invalid room set; since commit `5eeafce` it also exits with code 1, so both generators now behave the same here.
 
 ## C# style instead of a literal translation
 

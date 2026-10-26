@@ -22,8 +22,8 @@ The port is built **class by class, in the same order as the Rust generator was 
 | 2 | `Room` + `generate_rooms` (36063ae, 7cd5a1c) | [`Room.cs`](../procgen-csharp/Room.cs), [`RoomGeneration.cs`](../procgen-csharp/RoomGeneration.cs) | ✅ |
 | 3 | `validate_rooms` + retry loop (8415a9d, 71e3fd3) | [`Validation.cs`](../procgen-csharp/Validation.cs), [`Program.cs`](../procgen-csharp/Program.cs) | ✅ |
 | 4 | `generate_edges` (c4279d3) | [`Edge.cs`](../procgen-csharp/Edge.cs), [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs) | ✅ |
-| 5 | `build_tree` / Prim (c4279d3) | | ⏳ next |
-| 6 | doors (b04f021) | | ⏳ |
+| 5 | `build_tree` / Prim (c4279d3) | [`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs) | ✅ |
+| 6 | doors (b04f021) | | ⏳ next |
 | 7 | JSON export (997fb86) | | ⏳ |
 | 8 | BFS end room (4d0fb94) | | ⏳ |
 
@@ -43,7 +43,8 @@ flowchart LR
     val -- fail, attempts left --> gen
     val -- fail, no attempts left --> exit1[exit code 1]
     val -- pass --> edges[EdgeGeneration.GenerateEdges]
-    edges --> print[print rooms and edges to stderr]
+    edges --> prim[SpanningTree.BuildTree<br/>Prim]
+    prim --> print[print rooms, edges and tree to stderr]
 ```
 
 ### Planned
@@ -60,6 +61,7 @@ Same as Rust: rooms → validate → edges → Prim backbone → doors → BFS e
 | 4 | still invalid after all attempts | exit 1 | [L25–29](../procgen-csharp/Program.cs#L25-L29) |
 | 5 | print rooms | stderr | [L31–35](../procgen-csharp/Program.cs#L31-L35) |
 | 6 | `EdgeGeneration.GenerateEdges(rng, rooms)` | `edges: List<Edge>` (complete graph) | [L38–43](../procgen-csharp/Program.cs#L38-L43) |
+| 7 | `SpanningTree.BuildTree(edges, rooms.Count)` | `tree: List<Edge>` (n − 1 edges) | [L46–51](../procgen-csharp/Program.cs#L46-L51) |
 
 The same `rng` object is passed to every random step. C# classes are reference types, so passing `rng` to a method is the same as Rust's `&mut rng`: the method advances the one shared generator.
 
@@ -74,6 +76,7 @@ The same `rng` object is passed to every random step. C# classes are reference t
 | [`Validation`](../procgen-csharp/Validation.cs) | checking a room set | `ValidateRooms` | `validation.rs` |
 | [`Edge`](../procgen-csharp/Edge.cs) | candidate connection | `Weight`, `RoomA`, `RoomB` | `Edge` in `edge.rs` |
 | [`EdgeGeneration`](../procgen-csharp/EdgeGeneration.cs) | complete graph | `GenerateEdges`, `MinWeight`, `MaxWeight` | `generate_edges` in `edge.rs` |
+| [`SpanningTree`](../procgen-csharp/SpanningTree.cs) | backbone | `BuildTree` | `build_tree` in `tree.rs` |
 | `Program` (top-level statements) | entry point and pipeline | | `main.rs` |
 
 Each file has one responsibility, like the Rust modules. `RoomGeneration` and `Validation` are `static` classes because they hold no state, the same as free functions in Rust.
@@ -97,6 +100,8 @@ flowchart TD
     EdgeGeneration --> Pcg32
     EdgeGeneration --> Room
     EdgeGeneration --> Edge
+    Program --> SpanningTree
+    SpanningTree --> Edge
 ```
 
 `Room`, `Edge`, `Pcg32` and `Constants` depend on nothing. Dependencies only point "down", so there are no cycles.
@@ -125,5 +130,6 @@ Position and size can only be set when the room is created (`init`), because the
 | [`GenerateRooms`](../procgen-csharp/RoomGeneration.cs#L7-L30) | O(attempts · n) | ≤ 1000 × 20 overlap checks |
 | [`ValidateRooms`](../procgen-csharp/Validation.cs#L7-L37) | O(n²) | 190 pair checks |
 | [`GenerateEdges`](../procgen-csharp/EdgeGeneration.cs#L10-L27) | O(n²) | 190 edges |
+| [`BuildTree`](../procgen-csharp/SpanningTree.cs#L8-L40) | O(n · E) = O(n³) on a complete graph | 19 × 190 ≈ 3600 edge checks |
 
 Same as the Rust version, since the algorithm is the same.

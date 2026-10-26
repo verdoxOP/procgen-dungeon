@@ -30,8 +30,8 @@ C# generator → validated dungeon data → JSON → Godot
 | Room generation (random size and position, no overlap) | ✅ done, identical to Rust | [`RoomGeneration.cs`](procgen-csharp/RoomGeneration.cs) |
 | Room validation + retry loop | ✅ done, identical to Rust | [`Validation.cs`](procgen-csharp/Validation.cs), [`Program.cs` L14–29](procgen-csharp/Program.cs#L14-L29) |
 | Candidate edges (complete graph, random weights) | ✅ done, identical to Rust | [`EdgeGeneration.cs`](procgen-csharp/EdgeGeneration.cs) |
-| Backbone with Prim's algorithm | ⏳ next | |
-| Doors (wall per connection) | ⏳ planned | |
+| Backbone with Prim's algorithm | ✅ done, identical to Rust | [`SpanningTree.cs`](procgen-csharp/SpanningTree.cs) |
+| Doors (wall per connection) | ⏳ next | |
 | BFS: end room | ⏳ planned | |
 | JSON export | ⏳ planned | |
 | Corridors, population, stats | ⏳ planned (after Rust has them) | |
@@ -76,6 +76,10 @@ Checks the room count, minimum sizes and overlap (VR-01 – VR-04). `Program` re
 
 Connects every pair of rooms (a complete graph, `n · (n − 1) / 2` edges) and gives each pair a random weight from 1 to 100, in the same pair order as `edge.rs`. See [Graph and backbone](docs/graph.md).
 
+### 5. Backbone: Prim's algorithm ([`SpanningTree.cs`](procgen-csharp/SpanningTree.cs))
+
+Starting from room 0, repeatedly adds the cheapest edge from a connected room to a new room, until every room is connected: a spanning tree with `n − 1` edges, which become the doors. On equal weights the first edge in the list wins, like in `tree.rs`.
+
 ## Verified against Rust
 
 The C# output is compared with the Rust generator after every step. See [Verification](docs/verification.md).
@@ -87,17 +91,17 @@ The C# output is compared with the Rust generator after every step. See [Verific
 | Rooms for seeds 0–29 vs Matt's generator | identical (30/30) |
 | Retry loop on a 40×40 test map, seeds 0–199 (167 retries, 28 failures) | identical (200/200) |
 | Edges and weights for seeds 0–49 | identical (50/50) |
+| Prim backbone vs Rust `tree.dot`, seeds 0–99 | identical (100/100) |
+| Rooms, edges and backbone again vs Rust **5eeafce** (26 Oct), seeds 0–99 | identical (100/100 each) |
 
 ## Differences from the Rust version
 
-Deliberate, and none of them change the dungeon for a given seed:
+Deliberate, and none of them change the dungeon for a given seed. (The command-line differences are gone: since commit `5eeafce` the Rust generator also takes `--seed`, logs to stderr, prints the JSON to stdout and exits with code 1 when generation fails.)
 
 | Rust | C# | Why |
 |---|---|---|
-| seed read from stdin | `--seed <int>` argument | command-line contract with the Godot game |
-| logs on stdout | logs on stderr | stdout is reserved for the JSON |
-| continues with invalid rooms after all attempts fail | exits with code 1 | contract: exit 1 = generation failed |
 | `max_attempts`, unused `mst` | `MaxPlacementAttempts`, no `mst` | clearer name; unused constant left out |
+| `build_tree` with a `101` start weight and a loop that runs once | `BuildTree` without either | same tree, simpler code (see [Graph and backbone](docs/graph.md#differences-from-treers-same-result)) |
 
 ## Project structure
 
@@ -115,7 +119,8 @@ procgen-csharp/
     ├── RoomGeneration.cs       GenerateRooms / GenerateRoom
     ├── Validation.cs           ValidateRooms
     ├── Edge.cs                 Edge (two room ids + weight)
-    └── EdgeGeneration.cs       GenerateEdges (complete graph)
+    ├── EdgeGeneration.cs       GenerateEdges (complete graph)
+    └── SpanningTree.cs         BuildTree (Prim's algorithm)
 ```
 
 ## Configuration

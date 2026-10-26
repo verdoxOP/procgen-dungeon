@@ -13,8 +13,8 @@ Port order follows the Rust generator (see [Architecture → Porting approach](a
 | Room generation | ✅ done | [`RoomGeneration.cs`](../procgen-csharp/RoomGeneration.cs) | ✅ seeds 0–29 |
 | Room validation + retry loop | ✅ done | [`Validation.cs`](../procgen-csharp/Validation.cs) | ✅ 40 × 40 map, seeds 0–199 |
 | Candidate edges (complete graph) | ✅ done | [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs) | ✅ seeds 0–49 |
-| Backbone with Prim | ⏳ next | | |
-| Doors (wall per connection) | ⏳ planned | | |
+| Backbone with Prim | ✅ done | [`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs) | ✅ seeds 0–99 |
+| Doors (wall per connection) | ⏳ next | | |
 | JSON export to stdout | ⏳ planned | | |
 | BFS: end room | ⏳ planned | | |
 | `stats` (time and attempts per stage) | ⏳ planned | | |
@@ -30,8 +30,9 @@ Differences from Rust that are deliberate (not bugs) are listed in [Design decis
 
 | Rust issue | C# |
 |---|---|
-| continues with invalid rooms when all generation attempts fail | exits with code 1 |
+| continued with invalid rooms when all generation attempts failed (fixed in Rust in `5eeafce`) | exits with code 1 |
 | unused `mst` constant | not ported |
+| `build_tree`: starting weight `101`, a loop that runs once, edge 0 pushed again if nothing is found | none of these, same tree (see [Graph and backbone](graph.md#differences-from-treers-same-result)) |
 
 ## Test ideas
 
@@ -51,3 +52,6 @@ Things to turn into unit tests (e.g. xUnit), most of them already checked by han
 | seed 42 gives the same 18 rooms as Rust | regression against Rust |
 | n rooms give n · (n − 1) / 2 edges, each pair once, no self-loops | `GenerateEdges` |
 | every weight is within `MinWeight..=MaxWeight` | `GenerateEdges` |
+| the tree has n − 1 edges and reaches every room | `BuildTree` |
+| on equal weights the first edge in the list is chosen | `BuildTree` tie-break |
+| a small hand-made graph gives the known minimum spanning tree | `BuildTree` |

@@ -9,6 +9,12 @@ The C# generator is meant to produce **exactly** the same dungeon as the Rust ge
 - **Fair comparison:** if both generators produce the same dungeon, they do the same amount of work, so differences in speed come from the language and runtime, not from the algorithm or random luck.
 - **Correctness:** any difference means a bug in the port (a missing, extra or reordered random call, an off-by-one in a range, a different comparison).
 
+## Which Rust version
+
+Checks 1–6 were done against the Rust generator as it was on 20 October (last Rust change: `0bd251a`). On 26 October Matt pushed `5eeafce`, which switched the Rust generator to the command-line contract and added population. Rooms, edges, Prim, doors and BFS were not changed by that commit (only `println!` → `eprintln!`), and population runs after everything ported so far. Check 7 repeats the comparison against `5eeafce` to confirm this.
+
+**Always compare against a fresh build of the latest `origin/main`**, not an older build.
+
 ## Setup
 
 | Tool | Version used |
@@ -69,21 +75,33 @@ The Rust generator doesn't print its edges, so a temporary copy of it was built 
 
 **Result: 50/50 identical** (same pairs, same order, same weights). Seed 42: 18 rooms → 153 edges in both.
 
+### 6. Prim backbone vs Rust
+
+The Rust generator writes its spanning tree to `tree.dot` (one line per tree edge, in order, with the weight as label). For seeds 0–99 those lines were compared with the C# `Tree Edge a-b: weight w` lines.
+
+**Result: 100/100 identical** (same edges, same order, same weights). 87 of these trees contain equal weights, so equally cheap candidates are common and a different tie-break would very likely have shown up as a difference.
+
+### 7. Everything again vs the latest Rust (5eeafce)
+
+Built fresh from `origin/main` at `5eeafce`. That version prints the JSON to stdout and no longer writes `tree.dot`, so the backbone was compared through the doors in the JSON: each door is a tree edge, in the same order (`from`/`to` = the two rooms). Edges were checked with a copy of that version that prints them, as in check 5.
+
+**Result, seeds 0–99: rooms 100/100, edges 100/100, backbone 100/100 identical.**
+
 ## How to repeat a check
 
 For one seed, by hand:
 
 ```sh
-# Rust (from Algorithms/rust/procgen_dungeon/) — writes dungeon.json
-echo 42 | cargo run --release
+# Rust (from Algorithms/rust/procgen_dungeon/) — prints the JSON to stdout
+cargo run --release -- --seed 42 > rust.json
 
 # C# (from Algorithms/csharp/procgen-csharp/procgen-csharp/)
 dotnet run -c Release -- --seed 42
 ```
 
-Compare the `rooms` in `dungeon.json` with the `Room …` lines the C# generator prints. Once the C# generator writes JSON too, the two JSON files can be compared directly (apart from the `generator` field).
+Compare the `rooms` (and the `doors`, in order, for the backbone) in `rust.json` with the `Room …` and `Tree …` lines the C# generator prints. Once the C# generator writes JSON too, the two JSON files can be compared directly (apart from the `generator` field).
 
 ## Still to do
 
 - Turn these checks into unit tests (see [Roadmap](roadmap.md#test-ideas)).
-- Repeat the comparison for every new step: Prim, doors, BFS, JSON.
+- Repeat the comparison for every new step: doors, BFS, JSON.

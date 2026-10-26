@@ -42,4 +42,12 @@ foreach (Edge edge in edges)
     Console.Error.WriteLine(edge);
 }
 
+// Backbone: Prim's spanning tree over the edges. These edges become the doors.
+List<Edge> tree = SpanningTree.BuildTree(edges, rooms.Count);
+Console.Error.WriteLine($"Backbone has {tree.Count} edges");
+foreach (Edge edge in tree)
+{
+    Console.Error.WriteLine($"Tree {edge}");
+}
+
 return 0;

@@ -88,7 +88,7 @@ if still invalid: exit 1
 
 Each retry draws **new** numbers from the **same** RNG, so retries are deterministic per seed and match Rust's retries number for number.
 
-**Difference from Rust:** when all attempts fail, Rust continues with the invalid rooms (listed in its known issues); C# exits with code 1, as the command-line contract requires.
+When all attempts fail, C# exits with code 1, as the command-line contract requires. The Rust generator does the same since commit `5eeafce`; before that it continued with the invalid rooms.
 
 ### How often does it retry?
 
