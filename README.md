@@ -36,6 +36,19 @@ You need:
 
 3. **Pick a generator** in the menu (`procgen-csharp`, `procgen_dungeon`, or the built-in test file), optionally a seed, and press Start.
 
+## Previewing a dungeon in the editor
+
+Open `Scenes/dungeon_preview.tscn` in Godot. The whole dungeon for one seed is drawn in the 2D view, without running the game. In the Inspector:
+
+| Setting | |
+|---|---|
+| Generator | dropdown with every program in `generators/`, plus the test file |
+| Seed Value | changing it regenerates right away |
+| Generate / Random seed | run again, or pick a new seed |
+| Show | toggle the door lines, spawnables and room labels |
+
+Start room is outlined green, the end room red. Yellow lines connect the two sides of each door. Passive enemies are drawn slightly faded. The text above the map shows the counts and how long the generator took.
+
 ## How the game talks to a generator
 
 The game runs `generators/<name> --seed <number>` and reads the dungeon JSON from stdout. Any program that follows this contract shows up in the menu under its file name:
