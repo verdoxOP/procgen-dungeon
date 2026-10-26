@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>procgen_csharp</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
