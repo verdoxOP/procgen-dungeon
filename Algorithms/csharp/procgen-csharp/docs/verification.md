@@ -63,6 +63,12 @@ The retry loop never runs with the default settings (0 retries in seeds 0–2999
 
 These copies were temporary and are not part of the repository.
 
+### 5. Edges vs Rust
+
+The Rust generator doesn't print its edges, so a temporary copy of it was built with one extra line after `generate_edges` that prints every edge (`Edge a-b: weight w`) to stderr. For seeds 0–49 its edges were compared with the C# output.
+
+**Result: 50/50 identical** (same pairs, same order, same weights). Seed 42: 18 rooms → 153 edges in both.
+
 ## How to repeat a check
 
 For one seed, by hand:
@@ -80,4 +86,4 @@ Compare the `rooms` in `dungeon.json` with the `Room …` lines the C# generator
 ## Still to do
 
 - Turn these checks into unit tests (see [Roadmap](roadmap.md#test-ideas)).
-- Repeat check 3 for every new step: edges, Prim, doors, BFS, JSON.
+- Repeat the comparison for every new step: Prim, doors, BFS, JSON.

@@ -12,8 +12,8 @@ Port order follows the Rust generator (see [Architecture → Porting approach](a
 | Command line (`--seed`, exit codes) | ✅ done | [`Program.cs`](../procgen-csharp/Program.cs) | n/a |
 | Room generation | ✅ done | [`RoomGeneration.cs`](../procgen-csharp/RoomGeneration.cs) | ✅ seeds 0–29 |
 | Room validation + retry loop | ✅ done | [`Validation.cs`](../procgen-csharp/Validation.cs) | ✅ 40 × 40 map, seeds 0–199 |
-| Candidate edges (complete graph) | ⏳ next | | |
-| Backbone with Prim | ⏳ planned | | |
+| Candidate edges (complete graph) | ✅ done | [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs) | ✅ seeds 0–49 |
+| Backbone with Prim | ⏳ next | | |
 | Doors (wall per connection) | ⏳ planned | | |
 | JSON export to stdout | ⏳ planned | | |
 | BFS: end room | ⏳ planned | | |
@@ -49,3 +49,5 @@ Things to turn into unit tests (e.g. xUnit), most of them already checked by han
 | room ids equal their index | `GenerateRooms` |
 | `ValidateRooms` rejects too few rooms, a too-small room, and two overlapping rooms | VR-01 – VR-03 |
 | seed 42 gives the same 18 rooms as Rust | regression against Rust |
+| n rooms give n · (n − 1) / 2 edges, each pair once, no self-loops | `GenerateEdges` |
+| every weight is within `MinWeight..=MaxWeight` | `GenerateEdges` |

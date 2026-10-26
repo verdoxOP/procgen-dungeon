@@ -34,4 +34,12 @@ foreach (Room room in rooms)
     Console.Error.WriteLine(room);
 }
 
+// Edges: every pair of rooms is a candidate door, with a random weight.
+List<Edge> edges = EdgeGeneration.GenerateEdges(rng, rooms);
+Console.Error.WriteLine($"Generated {edges.Count} edges");
+foreach (Edge edge in edges)
+{
+    Console.Error.WriteLine(edge);
+}
+
 return 0;

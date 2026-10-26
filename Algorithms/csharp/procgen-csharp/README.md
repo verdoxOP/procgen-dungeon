@@ -29,8 +29,8 @@ C# generator → validated dungeon data → JSON → Godot
 | Command line (`--seed`, exit codes) | ✅ done | [`Program.cs` L6–12](procgen-csharp/Program.cs#L6-L12) |
 | Room generation (random size and position, no overlap) | ✅ done, identical to Rust | [`RoomGeneration.cs`](procgen-csharp/RoomGeneration.cs) |
 | Room validation + retry loop | ✅ done, identical to Rust | [`Validation.cs`](procgen-csharp/Validation.cs), [`Program.cs` L14–29](procgen-csharp/Program.cs#L14-L29) |
-| Candidate edges (complete graph, random weights) | ⏳ next | |
-| Backbone with Prim's algorithm | ⏳ planned | |
+| Candidate edges (complete graph, random weights) | ✅ done, identical to Rust | [`EdgeGeneration.cs`](procgen-csharp/EdgeGeneration.cs) |
+| Backbone with Prim's algorithm | ⏳ next | |
 | Doors (wall per connection) | ⏳ planned | |
 | BFS: end room | ⏳ planned | |
 | JSON export | ⏳ planned | |
@@ -72,6 +72,10 @@ Picks a target room count, then keeps placing random rooms and throws away any t
 
 Checks the room count, minimum sizes and overlap (VR-01 – VR-04). `Program` regenerates the rooms with the same RNG until they are valid, at most `MaxGenerationAttempts` times, and exits with code 1 if they never are.
 
+### 4. Candidate edges ([`EdgeGeneration.cs`](procgen-csharp/EdgeGeneration.cs))
+
+Connects every pair of rooms (a complete graph, `n · (n − 1) / 2` edges) and gives each pair a random weight from 1 to 100, in the same pair order as `edge.rs`. See [Graph and backbone](docs/graph.md).
+
 ## Verified against Rust
 
 The C# output is compared with the Rust generator after every step. See [Verification](docs/verification.md).
@@ -82,6 +86,7 @@ The C# output is compared with the Rust generator after every step. See [Verific
 | 505 `RandomRange` calls over 5 seeds vs Rust `rand_pcg` | identical |
 | Rooms for seeds 0–29 vs Matt's generator | identical (30/30) |
 | Retry loop on a 40×40 test map, seeds 0–199 (167 retries, 28 failures) | identical (200/200) |
+| Edges and weights for seeds 0–49 | identical (50/50) |
 
 ## Differences from the Rust version
 
@@ -108,7 +113,9 @@ procgen-csharp/
     ├── Pcg32.cs                seeded RNG (port of Rust's Pcg32)
     ├── Room.cs                 Room + overlap check
     ├── RoomGeneration.cs       GenerateRooms / GenerateRoom
-    └── Validation.cs           ValidateRooms
+    ├── Validation.cs           ValidateRooms
+    ├── Edge.cs                 Edge (two room ids + weight)
+    └── EdgeGeneration.cs       GenerateEdges (complete graph)
 ```
 
 ## Configuration
@@ -125,3 +132,4 @@ All values are in [`Constants.cs`](procgen-csharp/Constants.cs) and match `const
 | `MaxRoomWidth` / `MaxRoomHeight` | 20 | maximum room size |
 | `MapWidth` / `MapHeight` | 100 | map size in tiles |
 | `FormatVersion` | 2 | JSON format version (not used yet) |
+| `EdgeGeneration.MinWeight` / `MaxWeight` | 1 / 100 | edge weight range (hard-coded in Rust) |

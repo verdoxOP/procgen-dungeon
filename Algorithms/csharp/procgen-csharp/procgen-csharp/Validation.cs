@@ -1,7 +1,7 @@
 namespace procgen_csharp;
 
 // Room validation rules, same checks as validation.rs.
-public static class Validation
+public static class Validation 
 {
     // VR-03: enough rooms. VR-01/VR-04: every room at least the minimum size. VR-02: no overlap.
     public static bool ValidateRooms(List<Room> rooms)

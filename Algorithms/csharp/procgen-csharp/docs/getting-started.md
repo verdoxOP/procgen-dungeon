@@ -54,6 +54,7 @@ Everything below is printed to **stderr**, in order:
 | 2 | the reason, if a room set fails validation | [`Validation.cs`](../procgen-csharp/Validation.cs) |
 | 3 | `Valid rooms after N generation attempts` | [`Program.cs` L31](../procgen-csharp/Program.cs#L31) |
 | 4 | every room: id, position, size | [`Program.cs` L32–35](../procgen-csharp/Program.cs#L32-L35), [`Room.ToString`](../procgen-csharp/Room.cs#L26-L29) |
+| 5 | `Generated 153 edges`, then every edge with its weight | [`Program.cs` L39–43](../procgen-csharp/Program.cs#L39-L43), [`Edge.ToString`](../procgen-csharp/Edge.cs#L11-L14) |
 
 Example (seed `42`):
 
@@ -65,6 +66,10 @@ Room 1: x 27, y 76, 16x18
 Room 2: x 45, y 33, 11x9
 ...
 Room 17: x 8, y 35, 18x9
+Generated 153 edges
+Edge 0-1: weight 63
+Edge 0-2: weight 27
+...
 ```
 
 These are exactly the rooms the Rust generator produces for seed 42.

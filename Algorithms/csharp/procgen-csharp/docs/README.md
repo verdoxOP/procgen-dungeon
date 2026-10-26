@@ -12,6 +12,7 @@ All code references link to the exact lines in [`procgen-csharp/`](../procgen-cs
 | [Architecture](architecture.md) | Pipeline, data flow, classes and dependencies, mapping to the Rust modules |
 | [Random number generator](rng.md) | How the Pcg32 port works and why it gives the same numbers as Rust |
 | [Rooms](rooms.md) | `Room`, overlap check, room generation, validation and the retry loop |
+| [Graph and backbone](graph.md) | `Edge`, the complete graph, edge generation (Prim follows) |
 | [Configuration](configuration.md) | Every constant and what changing it does |
 | [Validation rules](validation-rules.md) | VR rules implemented so far, with code |
 | [Verification](verification.md) | How the C# output is compared with Rust, and the results |
@@ -28,3 +29,5 @@ All code references link to the exact lines in [`procgen-csharp/`](../procgen-cs
 | [`Room.cs`](../procgen-csharp/Room.cs) | room data type | [`Room`](../procgen-csharp/Room.cs#L4-L10), [`Overlaps`](../procgen-csharp/Room.cs#L13-L24) |
 | [`RoomGeneration.cs`](../procgen-csharp/RoomGeneration.cs) | placing rooms | [`GenerateRooms`](../procgen-csharp/RoomGeneration.cs#L7-L30), [`GenerateRoom`](../procgen-csharp/RoomGeneration.cs#L32-L44) |
 | [`Validation.cs`](../procgen-csharp/Validation.cs) | checking rooms | [`ValidateRooms`](../procgen-csharp/Validation.cs#L7-L37) |
+| [`Edge.cs`](../procgen-csharp/Edge.cs) | candidate connection | [`Edge`](../procgen-csharp/Edge.cs#L5-L15) |
+| [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs) | complete graph | [`GenerateEdges`](../procgen-csharp/EdgeGeneration.cs#L10-L27) |

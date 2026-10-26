@@ -18,6 +18,8 @@ All tunable values are in [`Constants.cs`](../procgen-csharp/Constants.cs). They
 | [`MapHeight`](../procgen-csharp/Constants.cs#L19) | 100 | [`GenerateRoom`](../procgen-csharp/RoomGeneration.cs#L42) | map height in tiles | `MAP_HEIGHT` |
 | [`FormatVersion`](../procgen-csharp/Constants.cs#L21) | 2 | not used yet (JSON export) | JSON format version | `FORMAT_VERSION` |
 
+Edge weights use two named constants in [`EdgeGeneration`](../procgen-csharp/EdgeGeneration.cs#L7-L8): `MinWeight = 1` and `MaxWeight = 100`. In Rust this range is hard-coded in `edge.rs` (with a matching `101` in `tree.rs`).
+
 Rust's `mst` constant is not ported: it is unused in Rust.
 
 C# naming: constants use PascalCase, the normal .NET convention, instead of Rust's `SCREAMING_CASE`. `max_attempts` became `MaxPlacementAttempts` to make clear it counts room placements, not generation attempts.
