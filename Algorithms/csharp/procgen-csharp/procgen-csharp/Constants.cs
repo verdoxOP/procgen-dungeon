@@ -19,4 +19,14 @@ public static class Constants
     public const int MapHeight = 100;
 
     public const int FormatVersion = 2;
+
+    // Population: chance (out of 100) that a normal room is an enemy room or an item room;
+    // the rest is empty. 60 / 15 / 25 by default.
+    public const int EnemyRoomChance = 60;
+    public const int ItemRoomChance = 15;
+    // One enemy per this many inside tiles, between 1 and MaxEnemiesPerRoom.
+    public const int TilesPerEnemy = 40;
+    public const int MaxEnemiesPerRoom = 6;
+    // Chance (out of 100) that a spawned enemy is aggressive instead of passive.
+    public const int AggressiveChance = 70;
 }

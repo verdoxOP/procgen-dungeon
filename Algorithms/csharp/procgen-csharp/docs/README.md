@@ -13,6 +13,7 @@ All code references link to the exact lines in [`procgen-csharp/`](../procgen-cs
 | [Random number generator](rng.md) | How the Pcg32 port works and why it gives the same numbers as Rust |
 | [Rooms](rooms.md) | `Room`, overlap check, room generation, validation and the retry loop |
 | [Graph and backbone](graph.md) | `Edge`, the complete graph, edge generation, Prim's algorithm and its tie-break, doors and their walls |
+| [Population](population.md) | Room kinds, spawning enemies and pickups, population validation, the door-position issue |
 | [Start, end and JSON output](output.md) | BFS end room, the JSON format and key order, running in the game |
 | [Configuration](configuration.md) | Every constant and what changing it does |
 | [Validation rules](validation-rules.md) | VR rules implemented so far, with code |
@@ -36,4 +37,6 @@ All code references link to the exact lines in [`procgen-csharp/`](../procgen-cs
 | [`Door.cs`](../procgen-csharp/Door.cs) | door data type | [`Wall`](../procgen-csharp/Door.cs#L4-L10), [`Door`](../procgen-csharp/Door.cs#L14-L25) |
 | [`DoorGeneration.cs`](../procgen-csharp/DoorGeneration.cs) | wall per door | [`GenerateDoors`](../procgen-csharp/DoorGeneration.cs#L6-L9), [`EdgeToDoor`](../procgen-csharp/DoorGeneration.cs#L14-L47) |
 | [`Bfs.cs`](../procgen-csharp/Bfs.cs) | end room | [`RoomDistances`](../procgen-csharp/Bfs.cs#L7-L40), [`FurthestRoom`](../procgen-csharp/Bfs.cs#L43-L55) |
-| [`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs) | JSON output | [`Build`](../procgen-csharp/DungeonJson.cs#L19-L50) |
+| [`Spawnable.cs`](../procgen-csharp/Spawnable.cs) | spawnable data types | `Spawnable`, `EnemySpawn`, `HealthSpawn`, `AmmoSpawn`, `BuffSpawn` |
+| [`Population.cs`](../procgen-csharp/Population.cs) | population | [`PopulateDungeon`](../procgen-csharp/Population.cs#L23-L75), [`ChooseRoomKinds`](../procgen-csharp/Population.cs#L78-L111), [`ValidatePopulation`](../procgen-csharp/Population.cs#L133-L175) |
+| [`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs) | JSON output | [`Build`](../procgen-csharp/DungeonJson.cs#L19-L49) |

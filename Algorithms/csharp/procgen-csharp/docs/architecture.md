@@ -26,7 +26,8 @@ The port is built **class by class, in the same order as the Rust generator was 
 | 6 | doors (b04f021) | [`Door.cs`](../procgen-csharp/Door.cs), [`DoorGeneration.cs`](../procgen-csharp/DoorGeneration.cs) | ✅ |
 | 7 | JSON export (997fb86) | [`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs) | ✅ |
 | 8 | BFS end room (4d0fb94) | [`Bfs.cs`](../procgen-csharp/Bfs.cs) | ✅ (together with 7: the JSON needs the end room) |
-| 9 | population + validation (5eeafce) | | ⏳ next |
+| 9 | population + validation (5eeafce) | [`Population.cs`](../procgen-csharp/Population.cs), [`Spawnable.cs`](../procgen-csharp/Spawnable.cs) | ✅ |
+| 10 | `stats` (not in Rust yet) | | ⏳ next |
 | — | corridors | | ❌ cut from scope (e3dc311) |
 
 After each step, the C# output is compared with the Rust output for the same seeds (see [Verification](verification.md)). A step is only done when the output is identical.
@@ -48,7 +49,10 @@ flowchart LR
     edges --> prim[SpanningTree.BuildTree<br/>Prim]
     prim --> doors[DoorGeneration.GenerateDoors]
     doors --> bfs[Bfs: end room]
-    bfs --> json[DungeonJson.Build]
+    bfs --> pop[Population.PopulateDungeon]
+    pop --> pval{Population.ValidatePopulation}
+    pval -- fail --> exit1b[exit code 1]
+    pval -- pass --> json[DungeonJson.Build]
     json --> stdout[JSON on stdout]
 ```
 
@@ -69,7 +73,9 @@ Same as Rust: rooms → validate → edges → Prim backbone → doors → BFS e
 | 7 | `SpanningTree.BuildTree(edges, rooms.Count)` | `tree: List<Edge>` (n − 1 edges) | [L46–51](../procgen-csharp/Program.cs#L46-L51) |
 | 8 | `DoorGeneration.GenerateDoors(tree, rooms)` | `doors: List<Door>` (one per tree edge) | [L54–58](../procgen-csharp/Program.cs#L54-L58) |
 | 9 | `Bfs.RoomDistances` + `Bfs.FurthestRoom` | `startRoom = 0`, `endRoom` | [L61–63](../procgen-csharp/Program.cs#L61-L63) |
-| 10 | `DungeonJson.Build(...)` | JSON on stdout | [L67](../procgen-csharp/Program.cs#L67) |
+| 10 | `Population.PopulateDungeon(rng, rooms, doors, start, end)` | room kinds, `spawnables` | [L66–71](../procgen-csharp/Program.cs#L66-L71) |
+| 11 | `Population.ValidatePopulation(...)` | exit 1 if invalid | [L73–77](../procgen-csharp/Program.cs#L73-L77) |
+| 12 | `DungeonJson.Build(...)` | JSON on stdout | [L80](../procgen-csharp/Program.cs#L80) |
 
 The same `rng` object is passed to every random step. C# classes are reference types, so passing `rng` to a method is the same as Rust's `&mut rng`: the method advances the one shared generator.
 
@@ -88,6 +94,8 @@ The same `rng` object is passed to every random step. C# classes are reference t
 | [`Wall`, `Door`](../procgen-csharp/Door.cs) | door data type | `RoomA`, `RoomB`, `WallA`, `WallB` | `Wall`, `Door` in `door.rs` |
 | [`DoorGeneration`](../procgen-csharp/DoorGeneration.cs) | wall per door | `GenerateDoors`, `EdgeToDoor`, `OppositeWall` | `generate_doors`, `edge_to_door`, `opposite_wall` in `door.rs` |
 | [`Bfs`](../procgen-csharp/Bfs.cs) | end room | `RoomDistances`, `FurthestRoom` | `room_distances`, `furthest_room` in `bfs.rs` |
+| [`Spawnable` records](../procgen-csharp/Spawnable.cs) | spawnable data types | `X`, `Y`, `IsHostile` + fields per kind | `Spawnable` enum in `population.rs` |
+| [`Population`](../procgen-csharp/Population.cs) | room kinds, spawning, validation | `PopulateDungeon`, `ChooseRoomKinds`, `EnemyCount`, `DoorTile`, `ValidatePopulation` | `population.rs` |
 | [`DungeonJson`](../procgen-csharp/DungeonJson.cs) | JSON output | `Build`, `GeneratorName` | `build_dungeon_json` in `dungeon_json.rs` |
 | `Program` (top-level statements) | entry point and pipeline | | `main.rs` |
 
@@ -124,6 +132,13 @@ flowchart TD
     DungeonJson --> Room
     DungeonJson --> Door
     DungeonJson --> Constants
+    DungeonJson --> Spawnable
+    Program --> Population
+    Population --> Pcg32
+    Population --> Room
+    Population --> Door
+    Population --> Spawnable
+    Population --> Constants
 ```
 
 `Room`, `Edge`, `Door`, `Pcg32` and `Constants` depend on nothing. Dependencies only point "down", so there are no cycles.
@@ -155,5 +170,7 @@ Position and size can only be set when the room is created (`init`), because the
 | [`BuildTree`](../procgen-csharp/SpanningTree.cs#L8-L40) | O(n · E) = O(n³) on a complete graph | 19 × 190 ≈ 3600 edge checks |
 | [`GenerateDoors`](../procgen-csharp/DoorGeneration.cs#L6-L9) | O(n) | 19 doors |
 | [`RoomDistances`](../procgen-csharp/Bfs.cs#L7-L40) | O(n) on a tree | 20 rooms, 19 doors |
+| [`PopulateDungeon`](../procgen-csharp/Population.cs#L23-L75) | O(tiles · doors) per room | ≤ 18 × 18 inside tiles per room |
+| [`ValidatePopulation`](../procgen-csharp/Population.cs#L133-L175) | O(n · spawnables) | 20 rooms × ~25 spawnables |
 
 Same as the Rust version, since the algorithm is the same.

@@ -16,7 +16,7 @@ public static class DungeonJson
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
     };
 
-    public static string Build(ulong seed, List<Room> rooms, List<Door> doors, int startRoom, int endRoom)
+    public static string Build(ulong seed, List<Room> rooms, List<Door> doors, List<Spawnable> spawnables, int startRoom, int endRoom)
     {
         var dungeon = new DungeonDto
         {
@@ -42,11 +42,23 @@ public static class DungeonJson
             }).ToList(),
             // Corridors were cut from the project's scope; always an empty list, like in Rust.
             Corridors = new List<object>(),
-            // Filled in by the population step (next).
-            Spawnables = new List<object>(),
+            Spawnables = spawnables.Select(ToDto).ToList(),
         };
 
         return JsonSerializer.Serialize(dungeon, Options);
+    }
+
+    // "type" first, then x and y, then only the fields of that kind (like serde's tagged enum).
+    private static SpawnableDto ToDto(Spawnable spawnable)
+    {
+        return spawnable switch
+        {
+            EnemySpawn e => new SpawnableDto { Type = "enemy", X = e.X, Y = e.Y, Enemy = e.Enemy, Behaviour = e.Behaviour },
+            HealthSpawn h => new SpawnableDto { Type = "health", X = h.X, Y = h.Y, Amount = h.Amount },
+            AmmoSpawn a => new SpawnableDto { Type = "ammo", X = a.X, Y = a.Y, Amount = a.Amount },
+            BuffSpawn b => new SpawnableDto { Type = "buff", X = b.X, Y = b.Y, Buff = b.Buff },
+            _ => throw new ArgumentException($"Unknown spawnable {spawnable}"),
+        };
     }
 
     // The classes below only describe the JSON shape. Properties are written in declaration order.
@@ -60,7 +72,19 @@ public static class DungeonJson
         [JsonPropertyName("end_room")] public int EndRoom { get; init; }
         [JsonPropertyName("doors")] public List<DoorDto> Doors { get; init; } = new();
         [JsonPropertyName("corridors")] public List<object> Corridors { get; init; } = new();
-        [JsonPropertyName("spawnables")] public List<object> Spawnables { get; init; } = new();
+        [JsonPropertyName("spawnables")] public List<SpawnableDto> Spawnables { get; init; } = new();
+    }
+
+    // Fields that don't belong to a kind stay null and are left out of the JSON.
+    private class SpawnableDto
+    {
+        [JsonPropertyName("type")] public string Type { get; init; } = "";
+        [JsonPropertyName("x")] public int X { get; init; }
+        [JsonPropertyName("y")] public int Y { get; init; }
+        [JsonPropertyName("enemy"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Enemy { get; init; }
+        [JsonPropertyName("behaviour"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Behaviour { get; init; }
+        [JsonPropertyName("amount"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public int? Amount { get; init; }
+        [JsonPropertyName("buff"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Buff { get; init; }
     }
 
     private class RoomDto

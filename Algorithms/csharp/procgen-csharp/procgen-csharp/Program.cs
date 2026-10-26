@@ -63,7 +63,20 @@ int[] distances = Bfs.RoomDistances(doors, rooms.Count, startRoom);
 int endRoom = Bfs.FurthestRoom(distances);
 Console.Error.WriteLine($"Start room {startRoom}, end room {endRoom} ({distances[endRoom]} doors away)");
 
+// Population: pick a kind for every room and fill it with enemies and pickups, then validate.
+var (roomKinds, spawnables) = Population.PopulateDungeon(rng, rooms, doors, startRoom, endRoom);
+for (int room = 0; room < roomKinds.Count; room++)
+{
+    Console.Error.WriteLine($"Room {room} is {roomKinds[room]}");
+}
+
+if (!Population.ValidatePopulation(rooms, doors, spawnables, startRoom))
+{
+    Console.Error.WriteLine("Population is not valid");
+    return 1;
+}
+
 // The dungeon as JSON on stdout: the only thing the game reads.
-Console.WriteLine(DungeonJson.Build(seed, rooms, doors, startRoom, endRoom));
+Console.WriteLine(DungeonJson.Build(seed, rooms, doors, spawnables, startRoom, endRoom));
 
 return 0;

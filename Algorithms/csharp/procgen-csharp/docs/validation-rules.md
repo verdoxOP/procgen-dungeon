@@ -17,10 +17,26 @@ On failure the whole room set is regenerated with the same RNG, up to `MaxGenera
 
 The checks run in the same order as in Rust and stop at the first failure. The order doesn't affect the dungeon (validation draws no random numbers), only which reason is printed.
 
+## PV: population validation
+
+Same checks as `validate_population` in Rust ([`Population.ValidatePopulation`](../procgen-csharp/Population.cs#L133-L175)). On failure the program exits with code 1; there is no retry (also as in Rust).
+
+| Rule | Description | Status | How |
+|---|---|---|---|
+| PV-01 | at least a minimum number of enemies | ❌ not checked | enemy rooms make it likely, but nothing enforces it (same in Rust) |
+| PV-02 | at least a minimum of health / pickups | 🟡 at least **one** pickup | the item-room fallback guarantees it; validation checks it |
+| PV-03 | at most a maximum of enemies per room | ✅ | no room has more enemies than `EnemyCount` allows |
+| PV-04 | spawnables don't share a tile | ✅ by construction | `TakeRandomTile` removes every used tile |
+| PV-05 | spawnables on walkable tiles | ✅ | every spawn must be inside a room, not on the outer ring or next to a door |
+| PV-06 | important resources reachable from the start | ✅ by construction | every room is on the backbone and there are no locked doors |
+| PV-07 | start room safety | ✅ | nothing hostile in the start room |
+
+The door check has a known limitation: see [Population → Known issue](population.md#known-issue-spawns-next-to-doors).
+
 ## Other stages
 
 | Prefix | Stage | C# status |
 |---|---|---|
-| BV | backbone validation | ⏳ after the backbone (Prim) is ported |
-| CV | corridor validation | ⏳ after corridors exist in Rust |
-| PV | population validation | ⏳ after population exists in Rust |
+| BV | backbone validation | no separate check, in Rust either: the backbone is a spanning tree, so every room is reachable and it has n − 1 edges by construction |
+| CV | corridor validation | ❌ cut: corridors were cut from scope (Rust `e3dc311`) |
+| PV | population validation | ✅ see above |

@@ -54,6 +54,8 @@ Everything below is printed to **stderr**, in order:
 | 6 | `Backbone has 17 edges`, then every tree edge | [`Program.cs` L47–51](../procgen-csharp/Program.cs#L47-L51) |
 | 7 | every door with its walls, e.g. `Door 0-15: bottom/top` | [`Program.cs` L55–58](../procgen-csharp/Program.cs#L55-L58), [`Door.ToString`](../procgen-csharp/Door.cs#L21-L24) |
 | 8 | `Start room 0, end room 6 (12 doors away)` | [`Program.cs` L64](../procgen-csharp/Program.cs#L64) |
+| 9 | the kind of every room, e.g. `Room 3 is Enemy` | [`Program.cs` L68–71](../procgen-csharp/Program.cs#L68-L71) |
+| 10 | the reason, if population validation fails (then exit 1) | [`Population.ValidatePopulation`](../procgen-csharp/Population.cs#L133-L175) |
 
 On **stdout** comes only the dungeon JSON. To see just the JSON, or just the logs:
 
@@ -84,6 +86,9 @@ Door 0-15: bottom/top
 Door 7-15: bottom/top
 ...
 Start room 0, end room 6 (12 doors away)
+Room 0 is Start
+Room 1 is Enemy
+...
 ```
 
 These are exactly the rooms the Rust generator produces for seed 42.

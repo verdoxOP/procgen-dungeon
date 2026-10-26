@@ -109,6 +109,23 @@ Both exes were copied into the game's `generators/` folder (the C# one published
 
 **Result: 13/13 checks passed.** The Rust dungeon also has its 26 spawnables for seed 42, the C# one none yet.
 
+### 11. Full JSON with population vs Rust (e3dc311)
+
+For seeds 0–999 both generators were run and compared on: exit code, the complete JSON (only `generator` ignored), the JSON text, and the room kinds from the logs (`Room 3 is Enemy`).
+
+**Result: 1000/1000 identical, and the JSON text is byte-for-byte identical** apart from the generator name. That covers 22 349 spawnables (20 376 enemies, 661 health, 640 ammo, 672 buffs).
+
+Two paths that don't run for every seed, checked separately with a temporary copy of the C# code that logs them:
+
+- the item-room fallback (no room rolled `Item`): used in **164 of the 1000 seeds**, all identical to Rust,
+- population validation failing: **0 of 1000** in both languages (see [Population → Step 4](population.md#step-4-validation--validatepopulation-l133175)), so the exit-1 path is identical in code but couldn't be compared on real output.
+
+The game test (check 10) was repeated with the new exe: **13/13 passed**, and the spawnable counts now match too (seed 42: 26 in both).
+
+### 12. Spawns next to doors (finding)
+
+Not a comparison, but found while porting: placing the doors the way the game does and checking every Rust spawnable for seeds 0–999 gives **304 spawnables (265 enemies) on or next to the tile where the player enters a room, in 260 seeds**. See [Population → Known issue](population.md#known-issue-spawns-next-to-doors).
+
 ## How to repeat a check
 
 For one seed, by hand:
@@ -126,9 +143,9 @@ dotnet run -c Release -- --seed 42
 dotnet run -c Release -- --seed 42 > csharp.json
 ```
 
-Then compare `rust.json` and `csharp.json`: apart from `"generator"` and `"spawnables"` they should be identical.
+Then compare `rust.json` and `csharp.json`: apart from `"generator"` they should be identical, byte for byte.
 
 ## Still to do
 
 - Turn these checks into unit tests (see [Roadmap](roadmap.md#test-ideas)).
-- Repeat the comparison for every new step: population, then `stats`.
+- Repeat the comparison for every new step: `stats` (timings will differ, the attempts must not).

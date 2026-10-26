@@ -35,7 +35,7 @@ Neither function draws random numbers.
 
 ## JSON output ([`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs))
 
-`DungeonJson.Build(...)` ([L19–50](../procgen-csharp/DungeonJson.cs#L19-L50)) turns the dungeon into the JSON the game reads: `format_version` 2, described in the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md). `Program` prints it to **stdout** ([L67](../procgen-csharp/Program.cs#L67)); that is the only thing on stdout.
+`DungeonJson.Build(...)` ([L19–49](../procgen-csharp/DungeonJson.cs#L19-L49)) turns the dungeon into the JSON the game reads: `format_version` 2, described in the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md). `Program` prints it to **stdout** ([L80](../procgen-csharp/Program.cs#L80)); that is the only thing on stdout.
 
 | Key | Value | Source |
 |---|---|---|
@@ -47,13 +47,13 @@ Neither function draws random numbers.
 | `end_room` | furthest room | `Bfs` |
 | `doors` | `from`, `to`, `from_wall`, `to_wall` per door, in tree order | `DoorGeneration` |
 | `corridors` | always `[]` | corridors were cut from scope (see below) |
-| `spawnables` | `[]` for now | population (next step) |
+| `spawnables` | enemies and pickups: `type`, `x`, `y` and the fields of that type | [`Population`](population.md) |
 
 ### Same shape as Rust
 
-The keys are written **in the same order** as Rust's `serde_json`: the small classes at the bottom of the file ([`DungeonDto`, `RoomDto`, `DoorDto`, L53–81](../procgen-csharp/DungeonJson.cs#L53-L81)) list their properties in that order, and `System.Text.Json` writes them in declaration order. `[JsonPropertyName]` gives the exact snake_case keys, and a `JsonStringEnumConverter` with camelCase naming writes the `Wall` enum as `"top"`, `"bottom"`, `"left"`, `"right"` ([L12–17](../procgen-csharp/DungeonJson.cs#L12-L17)). Both use 2-space indentation.
+The keys are written **in the same order** as Rust's `serde_json`: the small classes at the bottom of the file ([`DungeonDto`, `SpawnableDto`, `RoomDto`, `DoorDto`, L65–105](../procgen-csharp/DungeonJson.cs#L65-L105)) list their properties in that order, and `System.Text.Json` writes them in declaration order. `[JsonPropertyName]` gives the exact snake_case keys, and a `JsonStringEnumConverter` with camelCase naming writes the `Wall` enum as `"top"`, `"bottom"`, `"left"`, `"right"` ([L12–17](../procgen-csharp/DungeonJson.cs#L12-L17)). Both use 2-space indentation.
 
-The game reads the JSON by key, so the order doesn't matter to it, but it means the C# and Rust output can be compared as text: for seed 42 they are byte-for-byte identical apart from `generator` and `spawnables`.
+The game reads the JSON by key, so the order doesn't matter to it, but it means the C# and Rust output can be compared as text: for every seed tested (0–999) they are byte-for-byte identical apart from the `generator` name. Spawnables leave out the fields of other kinds (`JsonIgnore` when null), like serde's tagged enum.
 
 The internal classes (`Room`, `Door`) stay free of JSON attributes; only the DTOs know about the format. In Rust the same mapping is done with `#[serde(rename = ...)]` on the structs themselves.
 

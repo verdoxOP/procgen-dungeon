@@ -35,8 +35,8 @@ C# generator → validated dungeon data → JSON → Godot
 | BFS: end room | ✅ done, identical to Rust | [`Bfs.cs`](procgen-csharp/Bfs.cs) |
 | JSON export to stdout | ✅ done, identical to Rust | [`DungeonJson.cs`](procgen-csharp/DungeonJson.cs) |
 | Runs in the Godot game | ✅ done | see [Output](docs/output.md#running-in-the-game) |
-| Population + population validation | ⏳ next (in Rust since `5eeafce`) | |
-| `stats` (time and attempts per stage) | ⏳ planned (not in Rust yet) | |
+| Population + population validation | ✅ done, identical to Rust | [`Population.cs`](procgen-csharp/Population.cs) |
+| `stats` (time and attempts per stage) | ⏳ next (not in Rust yet either) | |
 | Corridors | ❌ cut from scope (also in Rust) | |
 | Unit tests | ⏳ planned | |
 
@@ -91,6 +91,10 @@ Every tree edge becomes a door. The bigger difference between the two room centr
 
 The start is room 0; BFS over the doors finds the end room, the one the most doors away. The dungeon is then printed to stdout as JSON in format version 2, with the same keys in the same order as the Rust generator. See [Start, end and JSON output](docs/output.md).
 
+### 8. Population ([`Population.cs`](procgen-csharp/Population.cs))
+
+Every room gets a kind (start, end, enemy, item or empty). Enemy rooms get 1–6 enemies depending on size, item rooms one pickup, the end room a boss. Spawns go on free inside tiles away from doors, and are validated afterwards (PV rules). See [Population](docs/population.md).
+
 ## Verified against Rust
 
 The C# output is compared with the Rust generator after every step. See [Verification](docs/verification.md).
@@ -106,7 +110,8 @@ The C# output is compared with the Rust generator after every step. See [Verific
 | Rooms, edges and backbone again vs Rust **5eeafce** (26 Oct), seeds 0–99 | identical (100/100 each) |
 | Doors and their walls vs Rust 5eeafce, seeds 0–299 (3839 doors, 36 ties) | identical (300/300) |
 | Full JSON vs Rust e3dc311 (except `generator` and `spawnables`), seeds 0–299 | identical (300/300) |
-| Both generators in the Godot game (load, play, same dungeon) | 13/13 checks passed |
+| Full JSON **including spawnables** vs Rust e3dc311, seeds 0–999 | identical, byte for byte (1000/1000) |
+| Both generators in the Godot game (load, play, same dungeon and spawnables) | 13/13 checks passed |
 
 ## Differences from the Rust version
 
@@ -138,6 +143,8 @@ procgen-csharp/
     ├── Door.cs                 Wall enum + Door
     ├── DoorGeneration.cs       GenerateDoors / EdgeToDoor (wall per side)
     ├── Bfs.cs                  RoomDistances / FurthestRoom (end room)
+    ├── Spawnable.cs            Spawnable records (enemy, health, ammo, buff)
+    ├── Population.cs           room kinds, spawning, population validation
     └── DungeonJson.cs          Build: the dungeon as JSON (format version 2)
 ```
 
@@ -156,3 +163,6 @@ All values are in [`Constants.cs`](procgen-csharp/Constants.cs) and match `const
 | `MapWidth` / `MapHeight` | 100 | map size in tiles |
 | `FormatVersion` | 2 | JSON format version |
 | `EdgeGeneration.MinWeight` / `MaxWeight` | 1 / 100 | edge weight range (hard-coded in Rust) |
+| `EnemyRoomChance` / `ItemRoomChance` | 60 / 15 | chance (of 100) a normal room is an enemy / item room |
+| `TilesPerEnemy` / `MaxEnemiesPerRoom` | 40 / 6 | enemies per room by size |
+| `AggressiveChance` | 70 | chance an enemy is aggressive |
