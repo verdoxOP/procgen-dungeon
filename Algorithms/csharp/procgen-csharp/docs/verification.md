@@ -87,6 +87,12 @@ Built fresh from `origin/main` at `5eeafce`. That version prints the JSON to std
 
 **Result, seeds 0–99: rooms 100/100, edges 100/100, backbone 100/100 identical.**
 
+### 8. Doors vs Rust (5eeafce)
+
+The Rust JSON lists the doors with `from`, `to`, `from_wall` and `to_wall`, in tree order. For seeds 0–299 these were compared with the C# `Door a-b: wallA/wallB` lines.
+
+**Result: 300/300 identical** (3839 doors). 36 of those doors are a tie (`|dx| = |dy|`, door goes in a left/right wall), so the tie rule is covered.
+
 ## How to repeat a check
 
 For one seed, by hand:
@@ -104,4 +110,4 @@ Compare the `rooms` (and the `doors`, in order, for the backbone) in `rust.json`
 ## Still to do
 
 - Turn these checks into unit tests (see [Roadmap](roadmap.md#test-ideas)).
-- Repeat the comparison for every new step: doors, BFS, JSON.
+- Repeat the comparison for every new step: JSON, BFS, population.

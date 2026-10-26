@@ -56,6 +56,7 @@ Everything below is printed to **stderr**, in order:
 | 4 | every room: id, position, size | [`Program.cs` L32–35](../procgen-csharp/Program.cs#L32-L35), [`Room.ToString`](../procgen-csharp/Room.cs#L26-L29) |
 | 5 | `Generated 153 edges`, then every edge with its weight | [`Program.cs` L39–43](../procgen-csharp/Program.cs#L39-L43), [`Edge.ToString`](../procgen-csharp/Edge.cs#L11-L14) |
 | 6 | `Backbone has 17 edges`, then every tree edge | [`Program.cs` L47–51](../procgen-csharp/Program.cs#L47-L51) |
+| 7 | every door with its walls, e.g. `Door 0-15: bottom/top` | [`Program.cs` L55–58](../procgen-csharp/Program.cs#L55-L58), [`Door.ToString`](../procgen-csharp/Door.cs#L21-L24) |
 
 Example (seed `42`):
 
@@ -74,6 +75,9 @@ Edge 0-2: weight 27
 Backbone has 17 edges
 Tree Edge 0-15: weight 7
 Tree Edge 7-15: weight 10
+...
+Door 0-15: bottom/top
+Door 7-15: bottom/top
 ...
 ```
 

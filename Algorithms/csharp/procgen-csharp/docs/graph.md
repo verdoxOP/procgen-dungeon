@@ -2,7 +2,7 @@
 
 [← Documentation home](README.md)
 
-Covers [`Edge.cs`](../procgen-csharp/Edge.cs), [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs) and [`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs).
+Covers [`Edge.cs`](../procgen-csharp/Edge.cs), [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs), [`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs), [`Door.cs`](../procgen-csharp/Door.cs) and [`DoorGeneration.cs`](../procgen-csharp/DoorGeneration.cs).
 
 Graph theory background (vertices, edges, trees, spanning trees, Prim vs Kruskal) and a worked example by hand are in [Rust → Graph and backbone](../../../rust/procgen_dungeon/docs/graph.md) and [Rust → Theory](../../../rust/procgen_dungeon/docs/theory.md).
 
@@ -86,3 +86,38 @@ Weights only go from 1 to 100, so equal weights are common: 87 of the first 100 
 ### Complexity
 
 Each of the `n − 1` steps scans all `n · (n − 1) / 2` edges: O(n³) on a complete graph. At 20 rooms that is 19 × 190 ≈ 3600 edge checks, which is nothing. A priority queue would only be worth it for much larger dungeons; keeping the same simple version as Rust keeps the comparison fair.
+
+## Doors ([`Door.cs`](../procgen-csharp/Door.cs), [`DoorGeneration.cs`](../procgen-csharp/DoorGeneration.cs))
+
+Every backbone edge becomes a **door**. The JSON only says which **wall** of each room the door is in; the game picks the exact tile itself (see the game's `FORMAT.md`). Port of [`door.rs`](../../../rust/procgen_dungeon/src/door.rs).
+
+### `Wall` and `Door` ([`Door.cs`](../procgen-csharp/Door.cs))
+
+| Type | Members | Rust | JSON |
+|---|---|---|---|
+| [`Wall`](../procgen-csharp/Door.cs#L4-L10) (enum) | `Top`, `Bottom`, `Left`, `Right` | `enum Wall` | `"top"`, `"bottom"`, `"left"`, `"right"` |
+| [`Door`](../procgen-csharp/Door.cs#L14-L25) | `RoomA`, `RoomB`, `WallA`, `WallB` | `room_a`, `room_b`, `wall_a`, `wall_b` | `from`, `to`, `from_wall`, `to_wall` |
+
+An enum instead of strings means a typo like `"rigth"` is a compile error instead of a bug in the game, the same reason Matt gives in `door.rs`.
+
+### `EdgeToDoor(edge, rooms)` ([`DoorGeneration.cs` L14–47](../procgen-csharp/DoorGeneration.cs#L14-L47))
+
+1. Look up both rooms by id (ids equal list indexes).
+2. Compute each room's centre: `x + width / 2`, `y + height / 2` ([L21–24](../procgen-csharp/DoorGeneration.cs#L21-L24)). Integer division, like Rust's `i32`; all values are positive, so both languages round the same way.
+3. `dx` and `dy` are the differences from room A's centre to room B's.
+4. **The bigger difference picks the axis** ([L30–38](../procgen-csharp/DoorGeneration.cs#L30-L38)):
+   - `|dx| >= |dy|`: the door is in A's **right** wall if B is to the right (`dx > 0`), otherwise in A's **left** wall,
+   - otherwise: A's **bottom** wall if B is below (`dy > 0`, because `y` grows downwards), otherwise A's **top** wall.
+5. Room B's door is in the **opposite** wall ([`OppositeWall`](../procgen-csharp/DoorGeneration.cs#L49-L58)).
+
+Example: room A's centre is at (10, 10) and room B's at (40, 20). `dx = 30`, `dy = 10`, so the door is in A's right wall and B's left wall.
+
+**Tie:** when `|dx| = |dy|` the door goes in a left or right wall, because the check is `>=`. This is Rust's rule and has to be copied exactly. In seeds 0–299 it happened for 36 of the 3839 doors. If both centres are at exactly the same spot (`dx = dy = 0`), the result is A: left, B: right, also as in Rust.
+
+### `GenerateDoors(tree, rooms)` ([L6–9](../procgen-csharp/DoorGeneration.cs#L6-L9))
+
+One door per tree edge, **in the same order as the tree**. That order ends up in the JSON, so it has to match Rust too. Doors draw no random numbers.
+
+### Diagonal neighbours
+
+Rooms are placed anywhere on the map, so two connected rooms can be far apart or diagonal from each other. The rule above always picks one wall per side, even then. Whether that's the best choice for diagonal rooms is an open question in the Rust docs: see [Rust → Design decisions → Doors](../../../rust/procgen_dungeon/docs/design-decisions.md#doors).

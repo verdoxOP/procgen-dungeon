@@ -50,4 +50,11 @@ foreach (Edge edge in tree)
     Console.Error.WriteLine($"Tree {edge}");
 }
 
+// Doors: every backbone edge becomes a door, in a wall that faces the other room.
+List<Door> doors = DoorGeneration.GenerateDoors(tree, rooms);
+foreach (Door door in doors)
+{
+    Console.Error.WriteLine(door);
+}
+
 return 0;

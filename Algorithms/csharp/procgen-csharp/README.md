@@ -31,9 +31,9 @@ C# generator → validated dungeon data → JSON → Godot
 | Room validation + retry loop | ✅ done, identical to Rust | [`Validation.cs`](procgen-csharp/Validation.cs), [`Program.cs` L14–29](procgen-csharp/Program.cs#L14-L29) |
 | Candidate edges (complete graph, random weights) | ✅ done, identical to Rust | [`EdgeGeneration.cs`](procgen-csharp/EdgeGeneration.cs) |
 | Backbone with Prim's algorithm | ✅ done, identical to Rust | [`SpanningTree.cs`](procgen-csharp/SpanningTree.cs) |
-| Doors (wall per connection) | ⏳ next | |
+| Doors (wall per connection) | ✅ done, identical to Rust | [`DoorGeneration.cs`](procgen-csharp/DoorGeneration.cs) |
 | BFS: end room | ⏳ planned | |
-| JSON export | ⏳ planned | |
+| JSON export | ⏳ next | |
 | Corridors, population, stats | ⏳ planned (after Rust has them) | |
 | Unit tests | ⏳ planned | |
 
@@ -80,6 +80,10 @@ Connects every pair of rooms (a complete graph, `n · (n − 1) / 2` edges) and 
 
 Starting from room 0, repeatedly adds the cheapest edge from a connected room to a new room, until every room is connected: a spanning tree with `n − 1` edges, which become the doors. On equal weights the first edge in the list wins, like in `tree.rs`.
 
+### 6. Doors ([`DoorGeneration.cs`](procgen-csharp/DoorGeneration.cs))
+
+Every tree edge becomes a door. The bigger difference between the two room centres decides the wall: left/right if the rooms are mostly side by side (also on a tie), top/bottom otherwise. The other room gets the opposite wall. Same rule as `door.rs`.
+
 ## Verified against Rust
 
 The C# output is compared with the Rust generator after every step. See [Verification](docs/verification.md).
@@ -93,6 +97,7 @@ The C# output is compared with the Rust generator after every step. See [Verific
 | Edges and weights for seeds 0–49 | identical (50/50) |
 | Prim backbone vs Rust `tree.dot`, seeds 0–99 | identical (100/100) |
 | Rooms, edges and backbone again vs Rust **5eeafce** (26 Oct), seeds 0–99 | identical (100/100 each) |
+| Doors and their walls vs Rust 5eeafce, seeds 0–299 (3839 doors, 36 ties) | identical (300/300) |
 
 ## Differences from the Rust version
 
@@ -120,7 +125,9 @@ procgen-csharp/
     ├── Validation.cs           ValidateRooms
     ├── Edge.cs                 Edge (two room ids + weight)
     ├── EdgeGeneration.cs       GenerateEdges (complete graph)
-    └── SpanningTree.cs         BuildTree (Prim's algorithm)
+    ├── SpanningTree.cs         BuildTree (Prim's algorithm)
+    ├── Door.cs                 Wall enum + Door
+    └── DoorGeneration.cs       GenerateDoors / EdgeToDoor (wall per side)
 ```
 
 ## Configuration

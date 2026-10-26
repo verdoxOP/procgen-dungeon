@@ -23,8 +23,8 @@ The port is built **class by class, in the same order as the Rust generator was 
 | 3 | `validate_rooms` + retry loop (8415a9d, 71e3fd3) | [`Validation.cs`](../procgen-csharp/Validation.cs), [`Program.cs`](../procgen-csharp/Program.cs) | ✅ |
 | 4 | `generate_edges` (c4279d3) | [`Edge.cs`](../procgen-csharp/Edge.cs), [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs) | ✅ |
 | 5 | `build_tree` / Prim (c4279d3) | [`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs) | ✅ |
-| 6 | doors (b04f021) | | ⏳ next |
-| 7 | JSON export (997fb86) | | ⏳ |
+| 6 | doors (b04f021) | [`Door.cs`](../procgen-csharp/Door.cs), [`DoorGeneration.cs`](../procgen-csharp/DoorGeneration.cs) | ✅ |
+| 7 | JSON export (997fb86) | | ⏳ next |
 | 8 | BFS end room (4d0fb94) | | ⏳ |
 
 After each step, the C# output is compared with the Rust output for the same seeds (see [Verification](verification.md)). A step is only done when the output is identical.
@@ -44,7 +44,8 @@ flowchart LR
     val -- fail, no attempts left --> exit1[exit code 1]
     val -- pass --> edges[EdgeGeneration.GenerateEdges]
     edges --> prim[SpanningTree.BuildTree<br/>Prim]
-    prim --> print[print rooms, edges and tree to stderr]
+    prim --> doors[DoorGeneration.GenerateDoors]
+    doors --> print[print rooms, edges, tree and doors to stderr]
 ```
 
 ### Planned
@@ -62,6 +63,7 @@ Same as Rust: rooms → validate → edges → Prim backbone → doors → BFS e
 | 5 | print rooms | stderr | [L31–35](../procgen-csharp/Program.cs#L31-L35) |
 | 6 | `EdgeGeneration.GenerateEdges(rng, rooms)` | `edges: List<Edge>` (complete graph) | [L38–43](../procgen-csharp/Program.cs#L38-L43) |
 | 7 | `SpanningTree.BuildTree(edges, rooms.Count)` | `tree: List<Edge>` (n − 1 edges) | [L46–51](../procgen-csharp/Program.cs#L46-L51) |
+| 8 | `DoorGeneration.GenerateDoors(tree, rooms)` | `doors: List<Door>` (one per tree edge) | [L54–58](../procgen-csharp/Program.cs#L54-L58) |
 
 The same `rng` object is passed to every random step. C# classes are reference types, so passing `rng` to a method is the same as Rust's `&mut rng`: the method advances the one shared generator.
 
@@ -77,6 +79,8 @@ The same `rng` object is passed to every random step. C# classes are reference t
 | [`Edge`](../procgen-csharp/Edge.cs) | candidate connection | `Weight`, `RoomA`, `RoomB` | `Edge` in `edge.rs` |
 | [`EdgeGeneration`](../procgen-csharp/EdgeGeneration.cs) | complete graph | `GenerateEdges`, `MinWeight`, `MaxWeight` | `generate_edges` in `edge.rs` |
 | [`SpanningTree`](../procgen-csharp/SpanningTree.cs) | backbone | `BuildTree` | `build_tree` in `tree.rs` |
+| [`Wall`, `Door`](../procgen-csharp/Door.cs) | door data type | `RoomA`, `RoomB`, `WallA`, `WallB` | `Wall`, `Door` in `door.rs` |
+| [`DoorGeneration`](../procgen-csharp/DoorGeneration.cs) | wall per door | `GenerateDoors`, `EdgeToDoor`, `OppositeWall` | `generate_doors`, `edge_to_door`, `opposite_wall` in `door.rs` |
 | `Program` (top-level statements) | entry point and pipeline | | `main.rs` |
 
 Each file has one responsibility, like the Rust modules. `RoomGeneration` and `Validation` are `static` classes because they hold no state, the same as free functions in Rust.
@@ -102,9 +106,13 @@ flowchart TD
     EdgeGeneration --> Edge
     Program --> SpanningTree
     SpanningTree --> Edge
+    Program --> DoorGeneration
+    DoorGeneration --> Edge
+    DoorGeneration --> Room
+    DoorGeneration --> Door
 ```
 
-`Room`, `Edge`, `Pcg32` and `Constants` depend on nothing. Dependencies only point "down", so there are no cycles.
+`Room`, `Edge`, `Door`, `Pcg32` and `Constants` depend on nothing. Dependencies only point "down", so there are no cycles.
 
 ## Core data type
 
@@ -131,5 +139,6 @@ Position and size can only be set when the room is created (`init`), because the
 | [`ValidateRooms`](../procgen-csharp/Validation.cs#L7-L37) | O(n²) | 190 pair checks |
 | [`GenerateEdges`](../procgen-csharp/EdgeGeneration.cs#L10-L27) | O(n²) | 190 edges |
 | [`BuildTree`](../procgen-csharp/SpanningTree.cs#L8-L40) | O(n · E) = O(n³) on a complete graph | 19 × 190 ≈ 3600 edge checks |
+| [`GenerateDoors`](../procgen-csharp/DoorGeneration.cs#L6-L9) | O(n) | 19 doors |
 
 Same as the Rust version, since the algorithm is the same.

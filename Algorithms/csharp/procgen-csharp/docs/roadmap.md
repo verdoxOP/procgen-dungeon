@@ -14,11 +14,12 @@ Port order follows the Rust generator (see [Architecture → Porting approach](a
 | Room validation + retry loop | ✅ done | [`Validation.cs`](../procgen-csharp/Validation.cs) | ✅ 40 × 40 map, seeds 0–199 |
 | Candidate edges (complete graph) | ✅ done | [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs) | ✅ seeds 0–49 |
 | Backbone with Prim | ✅ done | [`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs) | ✅ seeds 0–99 |
-| Doors (wall per connection) | ⏳ next | | |
-| JSON export to stdout | ⏳ planned | | |
+| Doors (wall per connection) | ✅ done | [`DoorGeneration.cs`](../procgen-csharp/DoorGeneration.cs) | ✅ seeds 0–299 |
+| JSON export to stdout | ⏳ next | | |
 | BFS: end room | ⏳ planned | | |
 | `stats` (time and attempts per stage) | ⏳ planned | | |
-| Corridors, population, locked doors | ⏳ after Rust has them | | |
+| Population + population validation (in Rust since `5eeafce`) | ⏳ planned | | |
+| Corridors, locked doors | ⏳ after Rust has them | | |
 | Unit tests | ⏳ planned | | |
 | Copy into the game's `generators/` folder | ⏳ planned | | |
 
@@ -55,3 +56,6 @@ Things to turn into unit tests (e.g. xUnit), most of them already checked by han
 | the tree has n − 1 edges and reaches every room | `BuildTree` |
 | on equal weights the first edge in the list is chosen | `BuildTree` tie-break |
 | a small hand-made graph gives the known minimum spanning tree | `BuildTree` |
+| room B right of / left of / below / above room A gives right / left / bottom / top for A and the opposite for B | `EdgeToDoor` |
+| `\|dx\| = \|dy\|` gives a left/right door | `EdgeToDoor` tie |
+| one door per tree edge, in tree order | `GenerateDoors` |
