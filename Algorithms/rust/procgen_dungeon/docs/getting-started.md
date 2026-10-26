@@ -19,48 +19,34 @@ From `Algorithms/rust/procgen_dungeon/`:
 
 ```sh
 cargo build
-cargo run
+cargo run -- --seed 42
 ```
 
-The program reads a seed from stdin ([`main.rs` L23–30](../src/main.rs#L23-L30)):
-
-```
-Enter a seed for the game:
-42
-```
-
-The seed must be a whole number that fits in a `u64`. Anything else makes the program panic with `Please enter a valid number` ([L29](../src/main.rs#L29)).
-
-You can also pipe the seed in:
-
-```sh
-echo 42 | cargo run
-```
+The seed is a `--seed <int>` CLI argument, not a stdin prompt ([`parse_seed_arg`, `main.rs` L32–46](../src/main.rs#L32-L46)) — this is the command-line contract the Godot game calls the built binary with (`GeneratorRunner.gd`). A missing or non-numeric seed prints a usage/error message to stderr and exits with code `2`.
 
 ## Reading the output
 
-In order:
+**stdout carries only the final dungeon JSON.** Everything else below goes to **stderr**, so stdout can be piped straight into a file or into Godot without stripping debug text:
 
-| # | Output | Printed by |
-|---|---|---|
-| 1 | `Generated 18 rooms in 35 attempts` (once per generation attempt) | [`room_generation.rs` L45](../src/room_generation.rs#L45) |
-| 2 | validation messages if a room set fails | [`validation.rs`](../src/validation.rs) |
-| 3 | edge count, printed once per edge (see [known issues](roadmap.md#known-issues)) | [`main.rs` L66–68](../src/main.rs#L66-L68) |
-| 4 | `rooms true after N generation attempts` | [`main.rs` L70–74](../src/main.rs#L70-L74) |
-| 5 | details of every room | [`main.rs` L76–81](../src/main.rs#L76-L81) |
-| 6 | ASCII grid of the map (see [Visualisation](visualisation.md)) | [`main.rs` L83–89](../src/main.rs#L83-L89) |
-| 7 | `tree.dot` / `tree.png` + terminal preview | [`main.rs` L90–91](../src/main.rs#L90-L91) |
+| # | Output | Stream | Printed by |
+|---|---|---|---|
+| 1 | `Generated 18 rooms in 35 attempts` (once per generation attempt) | stderr | [`room_generation.rs`](../src/room_generation.rs) |
+| 2 | validation messages if a room set fails | stderr | [`validation.rs`](../src/validation.rs) |
+| 3 | edge count, printed once per edge (see [known issues](roadmap.md#known-issues)) | stderr | [`main.rs`](../src/main.rs) |
+| 4 | `rooms valid after N generation attempts` | stderr | [`main.rs`](../src/main.rs) |
+| 5 | details of every room | stderr | [`main.rs`](../src/main.rs) |
+| 6 | ASCII grid of the map (see [Visualisation](visualisation.md)) | stderr | [`grid.rs`](../src/grid.rs) |
+| 7 | each door, each room's BFS distance from the start, the chosen end room | stderr | [`main.rs`](../src/main.rs) |
+| 8 | each room's populated kind (start/end/enemy/item/empty) | stderr | [`main.rs`](../src/main.rs) |
+| 9 | `tree.dot` / `tree.png` written to disk + terminal preview | — | [`main.rs`](../src/main.rs) |
+| 10 | the dungeon JSON (`format_version`, `seed`, `rooms`, `start_room`, `end_room`, `doors`, `corridors` (always `[]` — see [Design decisions → Corridors](design-decisions.md#corridors)), `spawnables`) | **stdout** | [`dungeon_json.rs`](../src/dungeon_json.rs) |
 
-Example (seed `42`):
+Exit codes: `0` success, `1` room generation or population validation failed, `2` bad/missing `--seed`.
 
-```
-Generated 18 rooms in 35 attempts
-rooms true after 1 generation attempts
-Checking room 0
-Room details: Room { width: 18, height: 9, x: 81, y: 33, id: 0 }
-Checking room 1
-Room details: Room { width: 16, height: 18, x: 27, y: 76, id: 1 }
-...
+To get only the JSON (what Godot does):
+
+```sh
+cargo run -- --seed 42 2>/dev/null
 ```
 
 ## Determinism check
@@ -68,9 +54,9 @@ Room details: Room { width: 16, height: 18, x: 27, y: 76, id: 1 }
 Run the same seed twice and compare the output:
 
 ```sh
-echo 42 | cargo run > a.txt
-echo 42 | cargo run > b.txt
-diff a.txt b.txt
+cargo run -- --seed 42 2>/dev/null > a.json
+cargo run -- --seed 42 2>/dev/null > b.json
+diff a.json b.json
 ```
 
 No diff means generation is deterministic for that seed. This works because:

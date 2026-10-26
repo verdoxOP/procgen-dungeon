@@ -38,15 +38,17 @@ An idea that was dropped along the way: spawning a random number of aggressive a
 
 ## PV: population validation
 
+Implemented in [`population::validate_population`](../src/population.rs#L247-L305).
+
 | Rule | Description | Status |
 |---|---|---|
-| PV-01 | the dungeon must contain at least `min_enemies` enemies | ⏳ planned |
-| PV-02 | the dungeon must contain at least `min_health` health pickups | ⏳ planned |
-| PV-03 | a room may not exceed `max_enemies_per_room` | ⏳ planned |
-| PV-04 | spawnables may not occupy the same tile | ⏳ planned |
-| PV-05 | spawnables must be placed on walkable tiles | ⏳ planned |
-| PV-06 | important resources must be reachable from the starting room | ⏳ planned |
-| PV-07 | the starting room must meet its configured safety rules | ⏳ planned |
+| PV-01 | the dungeon must contain at least `min_enemies` enemies | 🟡 only checked indirectly: every enemy room spawns at least one, but there's no dungeon-wide minimum count |
+| PV-02 | the dungeon must contain at least `min_health` health pickups | 🟡 only checked as "at least one non-hostile pickup exists" (health, ammo or buff), not health specifically |
+| PV-03 | a room may not exceed `max_enemies_per_room` | ✅ [`population.rs` L283–302](../src/population.rs#L283-L302), capped by [`MAX_ENEMIES_PER_ROOM`](configuration.md) |
+| PV-04 | spawnables may not occupy the same tile | ✅ [`take_random_tile`](../src/population.rs#L177-L183) removes a tile from the pool once used |
+| PV-05 | spawnables must be placed on walkable tiles | ✅ spawn tiles come from [`spawn_tiles`](../src/population.rs#L114-L124), always inside a room and off door tiles |
+| PV-06 | important resources must be reachable from the starting room | ⏳ trivially true on the backbone; a real check is only needed once locked doors exist |
+| PV-07 | the starting room must meet its configured safety rules | ✅ [`population.rs` L277–280](../src/population.rs#L277-L280): nothing hostile may spawn in the start room |
 
 PV-06 depends on the graph: "reachable" means there is a path of doors from the start room. On the backbone that's always true; it only becomes a real check once locked doors exist.
 
@@ -54,9 +56,9 @@ PV-06 depends on the graph: "reachable" means there is a path of doors from the 
 
 | Rule | Description | Status |
 |---|---|---|
-| CV | corridors may not skip the majority of the stage. Example: connecting room 1 to room 5 is not allowed; room 4 to room 6 or room 1 to room 3 is | ⏳ planned |
+| CV | corridors may not skip the majority of the stage. Example: connecting room 1 to room 5 is not allowed; room 4 to room 6 or room 1 to room 3 is | ❌ cut — corridors themselves were dropped from scope to make the deadline, see [Design decisions → Corridors](design-decisions.md#corridors) |
 
-Still open: how "skipping" is measured. Room ids don't say anything about position in the dungeon, so the most likely measure is the BFS distance (number of doors) between the two rooms on the backbone. See [Roadmap → open questions](roadmap.md#open-questions).
+`corridors` stays an empty array in the exported JSON, so this rule has nothing to validate for now.
 
 ## BV: backbone validation
 

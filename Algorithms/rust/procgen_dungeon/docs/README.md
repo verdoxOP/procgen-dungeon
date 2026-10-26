@@ -24,12 +24,18 @@ All code references link to the exact lines in [`src/`](../src/).
 
 | File | Responsibility | Main items |
 |---|---|---|
-| [`main.rs`](../src/main.rs) | entry point and pipeline | `main` |
+| [`main.rs`](../src/main.rs) | entry point and pipeline | `main`, `parse_seed_arg` |
 | [`constants.rs`](../src/constants.rs) | tunable parameters | all constants |
 | [`room.rs`](../src/room.rs) | room data type | [`Room`](../src/room.rs#L1-L8), [`room_overlap_check`](../src/room.rs#L11-L21) |
 | [`room_generation.rs`](../src/room_generation.rs) | placing rooms | [`generate_room`](../src/room_generation.rs#L11-L22), [`generate_rooms`](../src/room_generation.rs#L24-L47) |
 | [`validation.rs`](../src/validation.rs) | checking rooms | [`validate_rooms`](../src/validation.rs#L4-L32) |
 | [`edge.rs`](../src/edge.rs) | candidate connections | [`Edge`](../src/edge.rs#L6-L11), [`generate_edges`](../src/edge.rs#L12-L25) |
 | [`tree.rs`](../src/tree.rs) | backbone | [`build_tree`](../src/tree.rs#L4-L29) |
+| [`door.rs`](../src/door.rs) | doors from the backbone | `Door`, `Wall`, `generate_doors` |
+| [`bfs.rs`](../src/bfs.rs) | start/end room | `room_distances`, `furthest_room` |
+| [`population.rs`](../src/population.rs) | spawning enemies and pickups | `RoomKind`, `Spawnable`, `populate_dungeon`, `validate_population` |
+| [`dungeon_json.rs`](../src/dungeon_json.rs) | exported JSON shape | `DungeonJson`, `build_dungeon_json` |
 | [`grid.rs`](../src/grid.rs) | ASCII debug view | [`Grid`](../src/grid.rs#L6-L10), [`print_grid`](../src/grid.rs#L35-L40) |
 | [`tree_visualization.rs`](../src/tree_visualization.rs) | Graphviz debug view | [`visualize_tree_in_graph_form`](../src/tree_visualization.rs#L5-L53) |
+
+Corridors are cut from scope (deadline) — there is no `corridor.rs` module; `corridors` stays an empty array in the exported JSON.

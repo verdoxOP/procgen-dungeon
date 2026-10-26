@@ -17,6 +17,11 @@ All tunable values are in [`constants.rs`](../src/constants.rs). VR-04 ("minimum
 | [`MAX_ROOM_HEIGHT`](../src/constants.rs#L9) | `i32` | 20 | [`generate_room`](../src/room_generation.rs#L13) | maximum room height |
 | [`MAP_WIDTH`](../src/constants.rs#L10) | `i32` | 100 | [`generate_room`](../src/room_generation.rs#L19), [`main`](../src/main.rs#L83) | map width in tiles |
 | [`MAP_HEIGHT`](../src/constants.rs#L11) | `i32` | 100 | [`generate_room`](../src/room_generation.rs#L20), [`main`](../src/main.rs#L83) | map height in tiles |
+| `ENEMY_ROOM_CHANCE` | `i32` | 60 | [`population::random_room_kind`](../src/population.rs#L134-L143) | chance (out of 100) a non-start/end room becomes an enemy room |
+| `ITEM_ROOM_CHANCE` | `i32` | 15 | [`population::random_room_kind`](../src/population.rs#L134-L143) | chance (out of 100) a non-start/end room becomes an item room; the rest become empty |
+| `TILES_PER_ENEMY` | `i32` | 40 | [`population::enemy_count`](../src/population.rs#L127-L131) | floor tiles per enemy when sizing a room's enemy count |
+| `MAX_ENEMIES_PER_ROOM` | `usize` | 6 | [`population::enemy_count`](../src/population.rs#L127-L131) | hard cap on enemies in one room (PV-03) |
+| `AGGRESSIVE_CHANCE` | `i32` | 70 | [`population::random_behaviour`](../src/population.rs#L185-L191) | chance (out of 100) a spawned enemy is aggressive instead of passive |
 
 Hard-coded elsewhere:
 
@@ -42,11 +47,9 @@ A rough way to check if the numbers fit: average room area × target rooms shoul
 
 ## Planned parameters
 
-From the validation rules, population will need its own parameters (not in the code yet):
+`MAX_ENEMIES_PER_ROOM` (PV-03) and the start-room-safety check (PV-07) are now implemented (see above and [`population.rs`](../src/population.rs)). Still not in the code as explicit numbers:
 
 | Parameter | Rule |
 |---|---|
-| `min_enemies` | PV-01 |
+| `min_enemies` | PV-01 (currently only "at least one non-hostile pickup exists" is checked) |
 | `min_health` | PV-02 |
-| `max_enemies_per_room` | PV-03 |
-| start room safety rules | PV-07 |

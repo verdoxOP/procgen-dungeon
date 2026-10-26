@@ -184,13 +184,13 @@ Three options researched:
 
 | | Decision |
 |---|---|
-| ✅ | A corridor is a **hidden extra edge** between two rooms that aren't directly connected in the backbone. Adding it creates a cycle = an alternate route. |
-| ✅ | The backbone must be fully playable **without** corridors. |
-| ✅ | Corridors may not skip most of the stage (CV, see [Validation rules](validation-rules.md#cv-corridor-validation)). |
+| ❌ | **Cut from scope.** Not enough time left before the deadline to design, implement and validate them. |
+| ✅ | The backbone alone is the only way through the dungeon; it was already required to be fully playable without corridors, so cutting corridors doesn't break anything else. |
+| ✅ | `corridors` stays in the exported JSON as an always-empty array ([`dungeon_json.rs`](../src/dungeon_json.rs)), so the Godot side doesn't need a format change if corridors come back later. |
 
-Ideas from the brainstorm (not decided): a corridor may require breaking a weak wall (maybe with a random item or luck buff), may contain passive spawnables, and creates shortcuts.
+What was planned, for reference: a corridor would have been a **hidden extra edge** between two rooms not directly connected in the backbone (adding a cycle = an alternate route), possibly behind a weak wall, possibly holding passive spawnables, and restricted so it couldn't skip most of the stage (the dropped CV rule, see [Validation rules](validation-rules.md#cv-corridor-validation)).
 
-**Why:** in a tree there's exactly one path between any two rooms, so the dungeon can feel like a fixed route. Corridors add optional cycles without risking that a room becomes unreachable. This also helps against the brainstorm worry *"how do you stop a dungeon becoming one straight line?"*.
+**Why cut:** four weeks, two people, and corridors were the one MVP-adjacent stage that could be dropped without leaving the dungeon unplayable — the backbone alone already guarantees every room is reachable. It also closes the brainstorm open question about how to measure "skipping the stage" for corridors, since that rule no longer applies.
 
 ## Locked doors and keys
 
@@ -203,7 +203,8 @@ From the brainstorm: every room must be **reachable** from the start, but reacha
 | Level | Includes |
 |---|---|
 | **MVP** | room generation, backbone, validation, doors, population, seeded generation, Rust → JSON → Godot, tests |
-| **Nice to have** | smarter population, locked doors and keys, advanced corridors, benchmarking |
+| **Nice to have** | smarter population, locked doors and keys, benchmarking |
+| **Cut** | corridors — dropped due to the deadline, see [Corridors](#corridors) |
 | **Stretch** | infinite / chunk-based generation, progression systems, multithreading |
 
-**Why:** four weeks, two people. The earlier low-spec (Raspberry Pi) requirement was dropped, and chunk / infinite generation was moved to stretch.
+**Why:** four weeks, two people. The earlier low-spec (Raspberry Pi) requirement was dropped, chunk / infinite generation was moved to stretch, and corridors were cut entirely once it was clear there wasn't time to do them properly.
