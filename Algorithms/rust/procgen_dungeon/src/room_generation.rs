@@ -42,6 +42,6 @@ pub fn generate_rooms(rng: &mut Pcg32) -> Vec<Room> {
         }
     }
 
-    println!("Generated {} rooms in {} attempts", rooms.len(), attempts);
+    eprintln!("Generated {} rooms in {} attempts", rooms.len(), attempts);
     rooms
 }

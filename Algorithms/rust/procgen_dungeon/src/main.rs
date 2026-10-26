@@ -4,6 +4,7 @@ mod door;
 mod dungeon_json;
 mod edge;
 mod grid;
+mod population;
 mod room;
 mod room_generation;
 mod tree;
@@ -12,51 +13,49 @@ mod validation;
 
 use rand::SeedableRng;
 use rand_pcg::Pcg32;
-use std::io;
 
 use bfs::{furthest_room, room_distances};
 use constants::{MAP_HEIGHT, MAP_WIDTH, MAX_GENERATION_ATTEMPTS};
 use door::generate_doors;
-use dungeon_json::write_dungeon_json;
+use dungeon_json::build_dungeon_json;
 use edge::{Edge, generate_edges};
 use grid::{Grid, print_grid};
+use population::{populate_dungeon, validate_population};
 use room_generation::generate_rooms;
 use tree::build_tree;
-use tree_visualization::visualize_tree_in_graph_form;
 use validation::validate_rooms;
 
+// Command-line contract expected by the Godot game (GeneratorRunner.gd):
+//   procgen_dungeon --seed <int>
+//   stdout: only the dungeon JSON      stderr: logs
+//   exit 0 = ok, 1 = generation failed, 2 = invalid arguments
+fn parse_seed_arg(args: &[String]) -> Result<u64, String> {
+    let mut i = 1;
+    while i < args.len() {
+        if args[i] == "--seed" {
+            let value = args
+                .get(i + 1)
+                .ok_or_else(|| "--seed needs a value".to_string())?;
+            return value
+                .parse::<u64>()
+                .map_err(|_| format!("invalid seed '{}'", value));
+        }
+        i += 1;
+    }
+    Err("usage: procgen_dungeon --seed <int>".to_string())
+}
+
 fn main() {
-    let mut input = String::new();
-    println!("Enter a seed for the game:");
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
+    let args: Vec<String> = std::env::args().collect();
+    let game_seed = match parse_seed_arg(&args) {
+        Ok(seed) => seed,
+        Err(message) => {
+            eprintln!("{}", message);
+            std::process::exit(2);
+        }
+    };
 
-    let game_seed: u64 = input.trim().parse().expect("Please enter a valid number");
     let mut rng = Pcg32::seed_from_u64(game_seed);
-
-    /*
-    let test_room1 = Room{
-        id: 1,
-        width: 22,
-        height: 22,
-        x: 12,
-        y: 12
-
-    };
-     let test_room2 = Room{
-        id: 1,
-        width: 22,
-        height: 22,
-        x: 12,
-        y: 12
-
-    };
-
-    let test_rooms = vec![test_room1, test_room2];
-    println!("validation result {}",validate_rooms(&test_rooms));
-    for testing validation, dont forget to chnage const of min rooms to 2 because otheriwse it will aready fail based in too little rooms
-    */
 
     let mut rooms = generate_rooms(&mut rng);
     let mut generation_attempts = 1;
@@ -67,55 +66,56 @@ fn main() {
     }
 
     if !validate_rooms(&rooms) {
-        println!(
+        eprintln!(
             "no valid rooms after {} generation attempts",
             generation_attempts
         );
-        return;
+        std::process::exit(1);
     }
 
     let edges: Vec<Edge> = generate_edges(&mut rng, &rooms);
-    //let tree = build_tree(&edges, &rooms);
-
-    println!("amount of edges {}", edges.len());
-
-    let valid = validate_rooms(&rooms);
-    println!(
-        "rooms {} after {} generation attempts",
-        valid, generation_attempts
+    eprintln!("amount of edges {}", edges.len());
+    eprintln!(
+        "rooms valid after {} generation attempts",
+        generation_attempts
     );
 
-    for i in 0..rooms.len() {
-        println!("Checking room {}", rooms[i].id);
-        println!("Room details: {:?}", rooms[i]);
+    for room in &rooms {
+        eprintln!("Room details: {:?}", room);
     }
 
-    println!("these are the room details of each room: {:?}", rooms);
-
     let mut grid = Grid::constructor(MAP_WIDTH, MAP_HEIGHT);
-
     for existing_room in &rooms {
         grid.draw_room(existing_room);
     }
-
     print_grid(&grid);
     let tree = build_tree(&edges, &rooms);
     let doors = generate_doors(&tree, &rooms);
 
     for door in &doors {
-        println!("{:?}", door);
+        eprintln!("{:?}", door);
     }
 
     let start_room: usize = 0;
     let distances = room_distances(&doors, rooms.len(), start_room);
     for room in 0..distances.len() {
-        println!("room {} distance {}", room, distances[room]);
+        eprintln!("room {} distance {}", room, distances[room]);
     }
 
     let end_room = furthest_room(&distances);
-    println!("end room {}", end_room);
+    eprintln!("end room {}", end_room);
 
-    write_dungeon_json(game_seed, &rooms, &doors, start_room, end_room);
+    let (room_kinds, spawnables) =
+        populate_dungeon(&mut rng, &rooms, &doors, start_room, end_room);
+    for room in 0..room_kinds.len() {
+        eprintln!("room {} is {:?}", room, room_kinds[room]);
+    }
 
-    visualize_tree_in_graph_form(&tree, &rooms);
+    if !validate_population(&rooms, &doors, &spawnables, start_room) {
+        eprintln!("population is not valid");
+        std::process::exit(1);
+    }
+
+    let json = build_dungeon_json(game_seed, &rooms, &doors, &spawnables, start_room, end_room);
+    println!("{}", json);
 }
