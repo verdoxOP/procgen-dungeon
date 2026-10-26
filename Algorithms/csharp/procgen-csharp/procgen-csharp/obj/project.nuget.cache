@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "xkP/claNx6w=",
+  "dgSpecHash": "6LWo11EGPbc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ISSD\\Documents\\GitHub\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\mattn\\Documents\\rust-procgen\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\mattn\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.31\\microsoft.netcore.app.ref.8.0.31.nupkg.sha512",
+    "C:\\Users\\mattn\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.31\\microsoft.windowsdesktop.app.ref.8.0.31.nupkg.sha512",
+    "C:\\Users\\mattn\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.31\\microsoft.aspnetcore.app.ref.8.0.31.nupkg.sha512"
+  ],
   "logs": []
 }

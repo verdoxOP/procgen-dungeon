@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ISSD\\Documents\\GitHub\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj": {}
+    "C:\\Users\\mattn\\Documents\\rust-procgen\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ISSD\\Documents\\GitHub\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj": {
+    "C:\\Users\\mattn\\Documents\\rust-procgen\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ISSD\\Documents\\GitHub\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj",
+        "projectUniqueName": "C:\\Users\\mattn\\Documents\\rust-procgen\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj",
         "projectName": "procgen-csharp",
-        "projectPath": "C:\\Users\\ISSD\\Documents\\GitHub\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj",
-        "packagesPath": "C:\\Users\\ISSD\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ISSD\\Documents\\GitHub\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\obj\\",
+        "projectPath": "C:\\Users\\mattn\\Documents\\rust-procgen\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\procgen-csharp.csproj",
+        "packagesPath": "C:\\Users\\mattn\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mattn\\Documents\\rust-procgen\\procgen-dungeon\\Algorithms\\csharp\\procgen-csharp\\procgen-csharp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\ISSD\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\mattn\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -38,7 +38,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.400"
       },
       "frameworks": {
         "net8.0": {
@@ -55,12 +56,26 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.31, 8.0.31]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.31, 8.0.31]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.31, 8.0.31]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Users\\ISSD\\.dotnet\\sdk\\8.0.425/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

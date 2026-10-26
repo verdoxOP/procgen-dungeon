@@ -35,6 +35,6 @@ impl Grid {
 pub fn print_grid(grid: &Grid) {
     for row in &grid.chars {
         let line: String = row.iter().collect();
-        println!("{}", line);
+        eprintln!("{}", line);
     }
 }
