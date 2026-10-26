@@ -63,7 +63,9 @@ Matt cut corridors from the project because of the deadline (commit `e3dc311`, s
 
 ## Running in the game
 
-Publish a single exe and copy it into the game's `generators/` folder (gitignored):
+The easiest way: run `build-generators.ps1` (Windows) or `build-generators.sh` (Linux/macOS) from the repository root. It builds **both** generators, copies them into the game's `generators/` folder and tests each once (see the [root README](../../../../README.md#getting-started-after-cloning)).
+
+By hand, for the C# generator only: publish a single exe and copy it into the game's `generators/` folder (gitignored):
 
 ```sh
 dotnet publish -c Release -r win-x64 -p:SelfContained=false -p:PublishSingleFile=true -o publish
