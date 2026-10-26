@@ -32,9 +32,12 @@ C# generator → validated dungeon data → JSON → Godot
 | Candidate edges (complete graph, random weights) | ✅ done, identical to Rust | [`EdgeGeneration.cs`](procgen-csharp/EdgeGeneration.cs) |
 | Backbone with Prim's algorithm | ✅ done, identical to Rust | [`SpanningTree.cs`](procgen-csharp/SpanningTree.cs) |
 | Doors (wall per connection) | ✅ done, identical to Rust | [`DoorGeneration.cs`](procgen-csharp/DoorGeneration.cs) |
-| BFS: end room | ⏳ planned | |
-| JSON export | ⏳ next | |
-| Corridors, population, stats | ⏳ planned (after Rust has them) | |
+| BFS: end room | ✅ done, identical to Rust | [`Bfs.cs`](procgen-csharp/Bfs.cs) |
+| JSON export to stdout | ✅ done, identical to Rust | [`DungeonJson.cs`](procgen-csharp/DungeonJson.cs) |
+| Runs in the Godot game | ✅ done | see [Output](docs/output.md#running-in-the-game) |
+| Population + population validation | ⏳ next (in Rust since `5eeafce`) | |
+| `stats` (time and attempts per stage) | ⏳ planned (not in Rust yet) | |
+| Corridors | ❌ cut from scope (also in Rust) | |
 | Unit tests | ⏳ planned | |
 
 ## Requirements
@@ -84,6 +87,10 @@ Starting from room 0, repeatedly adds the cheapest edge from a connected room to
 
 Every tree edge becomes a door. The bigger difference between the two room centres decides the wall: left/right if the rooms are mostly side by side (also on a tie), top/bottom otherwise. The other room gets the opposite wall. Same rule as `door.rs`.
 
+### 7. Start, end and JSON ([`Bfs.cs`](procgen-csharp/Bfs.cs), [`DungeonJson.cs`](procgen-csharp/DungeonJson.cs))
+
+The start is room 0; BFS over the doors finds the end room, the one the most doors away. The dungeon is then printed to stdout as JSON in format version 2, with the same keys in the same order as the Rust generator. See [Start, end and JSON output](docs/output.md).
+
 ## Verified against Rust
 
 The C# output is compared with the Rust generator after every step. See [Verification](docs/verification.md).
@@ -98,6 +105,8 @@ The C# output is compared with the Rust generator after every step. See [Verific
 | Prim backbone vs Rust `tree.dot`, seeds 0–99 | identical (100/100) |
 | Rooms, edges and backbone again vs Rust **5eeafce** (26 Oct), seeds 0–99 | identical (100/100 each) |
 | Doors and their walls vs Rust 5eeafce, seeds 0–299 (3839 doors, 36 ties) | identical (300/300) |
+| Full JSON vs Rust e3dc311 (except `generator` and `spawnables`), seeds 0–299 | identical (300/300) |
+| Both generators in the Godot game (load, play, same dungeon) | 13/13 checks passed |
 
 ## Differences from the Rust version
 
@@ -127,7 +136,9 @@ procgen-csharp/
     ├── EdgeGeneration.cs       GenerateEdges (complete graph)
     ├── SpanningTree.cs         BuildTree (Prim's algorithm)
     ├── Door.cs                 Wall enum + Door
-    └── DoorGeneration.cs       GenerateDoors / EdgeToDoor (wall per side)
+    ├── DoorGeneration.cs       GenerateDoors / EdgeToDoor (wall per side)
+    ├── Bfs.cs                  RoomDistances / FurthestRoom (end room)
+    └── DungeonJson.cs          Build: the dungeon as JSON (format version 2)
 ```
 
 ## Configuration
@@ -143,5 +154,5 @@ All values are in [`Constants.cs`](procgen-csharp/Constants.cs) and match `const
 | `MinRoomWidth` / `MinRoomHeight` | 8 | minimum room size |
 | `MaxRoomWidth` / `MaxRoomHeight` | 20 | maximum room size |
 | `MapWidth` / `MapHeight` | 100 | map size in tiles |
-| `FormatVersion` | 2 | JSON format version (not used yet) |
+| `FormatVersion` | 2 | JSON format version |
 | `EdgeGeneration.MinWeight` / `MaxWeight` | 1 / 100 | edge weight range (hard-coded in Rust) |

@@ -15,13 +15,14 @@ Port order follows the Rust generator (see [Architecture → Porting approach](a
 | Candidate edges (complete graph) | ✅ done | [`EdgeGeneration.cs`](../procgen-csharp/EdgeGeneration.cs) | ✅ seeds 0–49 |
 | Backbone with Prim | ✅ done | [`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs) | ✅ seeds 0–99 |
 | Doors (wall per connection) | ✅ done | [`DoorGeneration.cs`](../procgen-csharp/DoorGeneration.cs) | ✅ seeds 0–299 |
-| JSON export to stdout | ⏳ next | | |
-| BFS: end room | ⏳ planned | | |
-| `stats` (time and attempts per stage) | ⏳ planned | | |
-| Population + population validation (in Rust since `5eeafce`) | ⏳ planned | | |
-| Corridors, locked doors | ⏳ after Rust has them | | |
+| JSON export to stdout | ✅ done | [`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs) | ✅ seeds 0–299 |
+| BFS: end room | ✅ done | [`Bfs.cs`](../procgen-csharp/Bfs.cs) | ✅ seeds 0–299 |
+| Population + population validation (in Rust since `5eeafce`) | ⏳ next | | |
+| `stats` (time and attempts per stage) | ⏳ planned (not in Rust yet either) | | |
+| Corridors | ❌ cut from scope (also in Rust, `e3dc311`) | | |
+| Locked doors and keys | ⏳ only if Rust adds them | | |
 | Unit tests | ⏳ planned | | |
-| Copy into the game's `generators/` folder | ⏳ planned | | |
+| Runs in the game's `generators/` folder | ✅ done | [Output](output.md#running-in-the-game) | ✅ same dungeon as Rust in the game |
 
 ## Known issues
 
@@ -59,3 +60,6 @@ Things to turn into unit tests (e.g. xUnit), most of them already checked by han
 | room B right of / left of / below / above room A gives right / left / bottom / top for A and the opposite for B | `EdgeToDoor` |
 | `\|dx\| = \|dy\|` gives a left/right door | `EdgeToDoor` tie |
 | one door per tree edge, in tree order | `GenerateDoors` |
+| BFS distances on a small hand-made tree; the furthest room wins, the lowest id on a tie | `Bfs` |
+| the JSON has the keys of `FORMAT.md` in Rust's order; walls are lowercase | `DungeonJson` |
+| seed 42 JSON equals a stored Rust JSON (except `generator` and `spawnables`) | regression against Rust |

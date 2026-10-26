@@ -13,6 +13,7 @@ All code references link to the exact lines in [`procgen-csharp/`](../procgen-cs
 | [Random number generator](rng.md) | How the Pcg32 port works and why it gives the same numbers as Rust |
 | [Rooms](rooms.md) | `Room`, overlap check, room generation, validation and the retry loop |
 | [Graph and backbone](graph.md) | `Edge`, the complete graph, edge generation, Prim's algorithm and its tie-break, doors and their walls |
+| [Start, end and JSON output](output.md) | BFS end room, the JSON format and key order, running in the game |
 | [Configuration](configuration.md) | Every constant and what changing it does |
 | [Validation rules](validation-rules.md) | VR rules implemented so far, with code |
 | [Verification](verification.md) | How the C# output is compared with Rust, and the results |
@@ -23,7 +24,7 @@ All code references link to the exact lines in [`procgen-csharp/`](../procgen-cs
 
 | File | Responsibility | Main items |
 |---|---|---|
-| [`Program.cs`](../procgen-csharp/Program.cs) | entry point and pipeline | arguments, retry loop, exit codes |
+| [`Program.cs`](../procgen-csharp/Program.cs) | entry point and pipeline | arguments, retry loop, exit codes, JSON to stdout |
 | [`Constants.cs`](../procgen-csharp/Constants.cs) | tunable parameters | all constants |
 | [`Pcg32.cs`](../procgen-csharp/Pcg32.cs) | seeded RNG | [`FromSeed`](../procgen-csharp/Pcg32.cs#L27-L42), [`NextU32`](../procgen-csharp/Pcg32.cs#L44-L49), [`RandomRange`](../procgen-csharp/Pcg32.cs#L52-L76) |
 | [`Room.cs`](../procgen-csharp/Room.cs) | room data type | [`Room`](../procgen-csharp/Room.cs#L4-L10), [`Overlaps`](../procgen-csharp/Room.cs#L13-L24) |
@@ -34,3 +35,5 @@ All code references link to the exact lines in [`procgen-csharp/`](../procgen-cs
 | [`SpanningTree.cs`](../procgen-csharp/SpanningTree.cs) | backbone | [`BuildTree`](../procgen-csharp/SpanningTree.cs#L8-L40) |
 | [`Door.cs`](../procgen-csharp/Door.cs) | door data type | [`Wall`](../procgen-csharp/Door.cs#L4-L10), [`Door`](../procgen-csharp/Door.cs#L14-L25) |
 | [`DoorGeneration.cs`](../procgen-csharp/DoorGeneration.cs) | wall per door | [`GenerateDoors`](../procgen-csharp/DoorGeneration.cs#L6-L9), [`EdgeToDoor`](../procgen-csharp/DoorGeneration.cs#L14-L47) |
+| [`Bfs.cs`](../procgen-csharp/Bfs.cs) | end room | [`RoomDistances`](../procgen-csharp/Bfs.cs#L7-L40), [`FurthestRoom`](../procgen-csharp/Bfs.cs#L43-L55) |
+| [`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs) | JSON output | [`Build`](../procgen-csharp/DungeonJson.cs#L19-L50) |

@@ -57,4 +57,13 @@ foreach (Door door in doors)
     Console.Error.WriteLine(door);
 }
 
+// Start and end room: the start is room 0, the end is the room the most doors away (BFS).
+const int startRoom = 0;
+int[] distances = Bfs.RoomDistances(doors, rooms.Count, startRoom);
+int endRoom = Bfs.FurthestRoom(distances);
+Console.Error.WriteLine($"Start room {startRoom}, end room {endRoom} ({distances[endRoom]} doors away)");
+
+// The dungeon as JSON on stdout: the only thing the game reads.
+Console.WriteLine(DungeonJson.Build(seed, rooms, doors, startRoom, endRoom));
+
 return 0;

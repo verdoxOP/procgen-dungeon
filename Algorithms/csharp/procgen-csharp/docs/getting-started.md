@@ -24,11 +24,7 @@ The `--` separates `dotnet run`'s own options from the program's arguments.
 
 The seed must be a whole number that fits in a `ulong` (0 to 18446744073709551615). Anything else prints a usage line and exits with code 2 ([`Program.cs` L6–10](../procgen-csharp/Program.cs#L6-L10)).
 
-To build a standalone exe (for example to copy into the game's `generators/` folder later):
-
-```sh
-dotnet publish -c Release
-```
+To build a single exe for the game's `generators/` folder, see [Start, end and JSON output → Running in the game](output.md#running-in-the-game).
 
 ## Command-line contract
 
@@ -38,7 +34,7 @@ The generator follows the same contract as every generator the Godot game can ru
 |---|---|
 | arguments | `--seed <int>` |
 | same seed | same dungeon (and the same dungeon as the Rust generator) |
-| stdout | only the dungeon JSON (not written yet, so stdout is empty for now) |
+| stdout | only the dungeon JSON (see [Start, end and JSON output](output.md)) |
 | stderr | all logs |
 | exit 0 | success |
 | exit 1 | generation failed ([`Program.cs` L25–29](../procgen-csharp/Program.cs#L25-L29)) |
@@ -57,6 +53,14 @@ Everything below is printed to **stderr**, in order:
 | 5 | `Generated 153 edges`, then every edge with its weight | [`Program.cs` L39–43](../procgen-csharp/Program.cs#L39-L43), [`Edge.ToString`](../procgen-csharp/Edge.cs#L11-L14) |
 | 6 | `Backbone has 17 edges`, then every tree edge | [`Program.cs` L47–51](../procgen-csharp/Program.cs#L47-L51) |
 | 7 | every door with its walls, e.g. `Door 0-15: bottom/top` | [`Program.cs` L55–58](../procgen-csharp/Program.cs#L55-L58), [`Door.ToString`](../procgen-csharp/Door.cs#L21-L24) |
+| 8 | `Start room 0, end room 6 (12 doors away)` | [`Program.cs` L64](../procgen-csharp/Program.cs#L64) |
+
+On **stdout** comes only the dungeon JSON. To see just the JSON, or just the logs:
+
+```sh
+dotnet run -- --seed 42 2> NUL     # only the JSON (Windows)
+dotnet run -- --seed 42 > NUL      # only the logs
+```
 
 Example (seed `42`):
 
@@ -79,6 +83,7 @@ Tree Edge 7-15: weight 10
 Door 0-15: bottom/top
 Door 7-15: bottom/top
 ...
+Start room 0, end room 6 (12 doors away)
 ```
 
 These are exactly the rooms the Rust generator produces for seed 42.

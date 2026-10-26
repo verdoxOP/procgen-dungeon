@@ -93,6 +93,22 @@ The Rust JSON lists the doors with `from`, `to`, `from_wall` and `to_wall`, in t
 
 **Result: 300/300 identical** (3839 doors). 36 of those doors are a tie (`|dx| = |dy|`, door goes in a left/right wall), so the tie rule is covered.
 
+### 9. Full JSON vs the latest Rust (e3dc311)
+
+Built fresh from `origin/main` at `e3dc311` (no code changes since `5eeafce`, only docs and corridors cut from scope). For seeds 0–299 both JSON outputs were parsed and compared, ignoring only `generator` (`"rust"` / `"csharp"`) and `spawnables` (not ported yet).
+
+**Result: 300/300 identical**, with the same key order. For seed 42 the text is byte-for-byte identical up to `spawnables` (apart from the generator name). The end room matches for every seed, so BFS is covered too.
+
+### 10. Both generators in the game
+
+Both exes were copied into the game's `generators/` folder (the C# one published as a single 170 KB exe) and a headless Godot script ran the real menu and game code:
+
+- the menu lists `procgen-csharp` and `procgen_dungeon`,
+- seed 42 loads with both, without errors: 18 rooms, 17 doors, end room 6, the player starts in room 0 and walking through a door loads the right room,
+- seeds 1, 7, 123 and 99999 give the same rooms, doors and end room with both generators.
+
+**Result: 13/13 checks passed.** The Rust dungeon also has its 26 spawnables for seed 42, the C# one none yet.
+
 ## How to repeat a check
 
 For one seed, by hand:
@@ -105,9 +121,14 @@ cargo run --release -- --seed 42 > rust.json
 dotnet run -c Release -- --seed 42
 ```
 
-Compare the `rooms` (and the `doors`, in order, for the backbone) in `rust.json` with the `Room …` and `Tree …` lines the C# generator prints. Once the C# generator writes JSON too, the two JSON files can be compared directly (apart from the `generator` field).
+```sh
+# C# (from Algorithms/csharp/procgen-csharp/procgen-csharp/)
+dotnet run -c Release -- --seed 42 > csharp.json
+```
+
+Then compare `rust.json` and `csharp.json`: apart from `"generator"` and `"spawnables"` they should be identical.
 
 ## Still to do
 
 - Turn these checks into unit tests (see [Roadmap](roadmap.md#test-ideas)).
-- Repeat the comparison for every new step: JSON, BFS, population.
+- Repeat the comparison for every new step: population, then `stats`.

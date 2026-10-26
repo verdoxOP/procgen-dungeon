@@ -51,7 +51,7 @@ Legend: ✅ decided · ❓ open
 |---|---|---|
 | seed from stdin (`Enter a seed for the game:`) | `--seed <int>` argument | `--seed <int>` argument |
 | logs on stdout | logs on stderr | logs on stderr |
-| `dungeon.json` file | JSON on stdout | JSON on stdout (planned) |
+| `dungeon.json` file | JSON on stdout | JSON on stdout |
 
 | | Decision |
 |---|---|
