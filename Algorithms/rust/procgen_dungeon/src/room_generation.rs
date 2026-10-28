@@ -45,3 +45,48 @@ pub fn generate_rooms(rng: &mut Pcg32) -> Vec<Room> {
     eprintln!("Generated {} rooms in {} attempts", rooms.len(), attempts);
     rooms
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rand::SeedableRng;
+
+    #[test]
+    //every generated room fits inside the map
+    fn rooms_fit_inside_map() {
+        for seed in 0..200 {
+            let mut rng = Pcg32::seed_from_u64(seed);
+            for room in generate_rooms(&mut rng) {
+                assert!(room.x >= 0 && room.y >= 0, "seed {}", seed);
+                assert!(room.x + room.width <= MAP_WIDTH, "seed {}", seed);
+                assert!(room.y + room.height <= MAP_HEIGHT, "seed {}", seed);
+            }
+        }
+    }
+
+    #[test]
+    //no two generated rooms overlap (VR-02)
+    fn rooms_do_not_overlap() {
+        for seed in 0..200 {
+            let mut rng = Pcg32::seed_from_u64(seed);
+            let rooms = generate_rooms(&mut rng);
+            for i in 0..rooms.len() {
+                for j in (i + 1)..rooms.len() {
+                    assert!(!rooms[i].room_overlap_check(&rooms[j]), "seed {}", seed);
+                }
+            }
+        }
+    }
+
+    #[test]
+    //the id of every room is its index in the vec
+    fn room_id_is_index() {
+        for seed in 0..200 {
+            let mut rng = Pcg32::seed_from_u64(seed);
+            let rooms = generate_rooms(&mut rng);
+            for (index, room) in rooms.iter().enumerate() {
+                assert_eq!(room.id, index, "seed {}", seed);
+            }
+        }
+    }
+}

@@ -40,3 +40,39 @@ pub fn furthest_room(distances: &[i32]) -> usize {
     }
     end_room
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::door::Wall;
+
+    fn door(room_a: usize, room_b: usize) -> Door {
+        Door { room_a, room_b, wall_a: Wall::Right, wall_b: Wall::Left }
+    }
+
+    #[test]
+    //on a line 0-1-2-3 the start is 0 doors away and room 3 is furthest
+    fn distances_on_a_line() {
+        let doors = vec![door(0, 1), door(1, 2), door(2, 3)];
+        let distances = room_distances(&doors, 4, 0);
+        assert_eq!(distances, vec![0, 1, 2, 3]);
+        assert_eq!(furthest_room(&distances), 3);
+    }
+
+    #[test]
+    //doors work both ways, so a door stored as 1->0 still reaches room 1 from 0
+    fn doors_go_both_ways() {
+        let doors = vec![door(1, 0), door(2, 1)];
+        let distances = room_distances(&doors, 3, 0);
+        assert_eq!(distances, vec![0, 1, 2]);
+    }
+
+    #[test]
+    //on a tie between two furthest rooms the lowest id wins
+    fn tie_lowest_id_wins() {
+        let doors = vec![door(0, 1), door(1, 2), door(0, 3), door(3, 4)];
+        let distances = room_distances(&doors, 5, 0);
+        assert_eq!(distances, vec![0, 1, 2, 1, 2]);
+        assert_eq!(furthest_room(&distances), 2);
+    }
+}

@@ -72,3 +72,72 @@ pub fn generate_doors(tree: &[Edge], rooms: &[Room]) -> Vec<Door> {
     }
     doors
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn room(x: i32, y: i32, id: usize) -> Room {
+        Room { width: 10, height: 10, x, y, id }
+    }
+
+    fn door_from_0_to_1(other_x: i32, other_y: i32) -> Door {
+        let rooms = vec![room(50, 50, 0), room(other_x, other_y, 1)];
+        let edge = Edge { weight: 1, Ivertex1: 0, Ivertex2: 1 };
+        edge_to_door(&edge, &rooms)
+    }
+
+    #[test]
+    //room b to the right gets a right door in a and a left door in b
+    fn door_right() {
+        let door = door_from_0_to_1(70, 50);
+        assert!(matches!(door.wall_a, Wall::Right));
+        assert!(matches!(door.wall_b, Wall::Left));
+    }
+
+    #[test]
+    //room b to the left gets a left door in a and a right door in b
+    fn door_left() {
+        let door = door_from_0_to_1(30, 50);
+        assert!(matches!(door.wall_a, Wall::Left));
+        assert!(matches!(door.wall_b, Wall::Right));
+    }
+
+    #[test]
+    //room b below gets a bottom door in a and a top door in b
+    fn door_bottom() {
+        let door = door_from_0_to_1(50, 70);
+        assert!(matches!(door.wall_a, Wall::Bottom));
+        assert!(matches!(door.wall_b, Wall::Top));
+    }
+
+    #[test]
+    //room b above gets a top door in a and a bottom door in b
+    fn door_top() {
+        let door = door_from_0_to_1(50, 30);
+        assert!(matches!(door.wall_a, Wall::Top));
+        assert!(matches!(door.wall_b, Wall::Bottom));
+    }
+
+    #[test]
+    //on a diagonal tie |dx| == |dy| the door goes on the left or right wall
+    fn diagonal_tie_goes_left_or_right() {
+        assert!(matches!(door_from_0_to_1(70, 70).wall_a, Wall::Right));
+        assert!(matches!(door_from_0_to_1(30, 30).wall_a, Wall::Left));
+        assert!(matches!(door_from_0_to_1(70, 30).wall_a, Wall::Right));
+        assert!(matches!(door_from_0_to_1(30, 70).wall_a, Wall::Left));
+    }
+
+    #[test]
+    //wall_b is always the opposite of wall_a
+    fn wall_b_is_opposite_of_wall_a() {
+        for (x, y) in [(70, 50), (30, 50), (50, 70), (50, 30), (70, 70), (30, 30), (65, 80), (20, 55)] {
+            let door = door_from_0_to_1(x, y);
+            let expected = opposite_wall(door.wall_a);
+            assert_eq!(
+                std::mem::discriminant(&door.wall_b),
+                std::mem::discriminant(&expected)
+            );
+        }
+    }
+}

@@ -303,3 +303,84 @@ pub fn validate_population(
 
     true
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::bfs::{furthest_room, room_distances};
+    use crate::constants::MAX_GENERATION_ATTEMPTS;
+    use crate::door::generate_doors;
+    use crate::edge::generate_edges;
+    use crate::room_generation::generate_rooms;
+    use crate::tree::build_tree;
+    use crate::validation::validate_rooms;
+    use rand::SeedableRng;
+
+    fn generate(seed: u64) -> (Vec<Room>, Vec<Door>, Vec<Spawnable>) {
+        let mut rng = Pcg32::seed_from_u64(seed);
+        let mut rooms = generate_rooms(&mut rng);
+        let mut generation_attempts = 1;
+        while !validate_rooms(&rooms) && generation_attempts < MAX_GENERATION_ATTEMPTS {
+            generation_attempts += 1;
+            rooms = generate_rooms(&mut rng);
+        }
+        assert!(validate_rooms(&rooms), "seed {} has no valid rooms", seed);
+        let edges = generate_edges(&mut rng, &rooms);
+        let tree = build_tree(&edges, &rooms);
+        let doors = generate_doors(&tree, &rooms);
+        let distances = room_distances(&doors, rooms.len(), 0);
+        let end_room = furthest_room(&distances);
+        let (_, spawnables) = populate_dungeon(&mut rng, &rooms, &doors, 0, end_room);
+        (rooms, doors, spawnables)
+    }
+
+    #[test]
+    //nothing hostile spawns in the start room (PV-07)
+    fn no_hostiles_in_start_room() {
+        for seed in 0..200 {
+            let (rooms, _, spawnables) = generate(seed);
+            for spawnable in &spawnables {
+                let (x, y) = spawnable.position();
+                let room = room_at(&rooms, x, y).expect("spawn outside every room");
+                assert!(!(room.id == 0 && spawnable.is_hostile()), "seed {}", seed);
+            }
+        }
+    }
+
+    #[test]
+    //no room has more than MAX_ENEMIES_PER_ROOM enemies (PV-03)
+    fn max_enemies_per_room() {
+        for seed in 0..200 {
+            let (rooms, _, spawnables) = generate(seed);
+            for room in &rooms {
+                let enemies = spawnables
+                    .iter()
+                    .filter(|s| s.is_hostile() && is_inside_room(room, s.position().0, s.position().1))
+                    .count();
+                assert!(enemies <= MAX_ENEMIES_PER_ROOM, "seed {} room {}", seed, room.id);
+            }
+        }
+    }
+
+    #[test]
+    //no two spawnables stand on the same tile (PV-04)
+    fn no_two_spawnables_on_same_tile() {
+        for seed in 0..200 {
+            let (_, _, spawnables) = generate(seed);
+            let mut positions: Vec<(i32, i32)> = spawnables.iter().map(|s| s.position()).collect();
+            let count = positions.len();
+            positions.sort();
+            positions.dedup();
+            assert_eq!(positions.len(), count, "seed {}", seed);
+        }
+    }
+
+    #[test]
+    //the generated population passes validate_population
+    fn generated_population_is_valid() {
+        for seed in 0..200 {
+            let (rooms, doors, spawnables) = generate(seed);
+            assert!(validate_population(&rooms, &doors, &spawnables, 0), "seed {}", seed);
+        }
+    }
+}
