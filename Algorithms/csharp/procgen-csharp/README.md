@@ -38,12 +38,12 @@ C# generator → validated dungeon data → JSON → Godot
 | Population + population validation | ✅ done, identical to Rust | [`Population.cs`](procgen-csharp/Population.cs) |
 | `stats` (time and attempts per stage) | ⏳ next (not in Rust yet either) | |
 | Corridors | ❌ cut from scope (also in Rust) | |
-| Unit tests | ⏳ planned | |
+| Unit tests (same 26 tests as Rust) | ✅ done, all pass | [`procgen-csharp.Tests`](procgen-csharp.Tests), see [Test plan](docs/test-plan.md) |
 
 ## Requirements
 
 - .NET SDK 8 or newer (the project targets `net8.0`)
-- No NuGet packages
+- No NuGet packages in the generator. The test project uses xUnit (restored automatically by `dotnet test`).
 
 ## Running
 
@@ -60,6 +60,16 @@ The seed is a command-line argument, following the contract the Godot game uses 
 | 0 | success |
 | 1 | generation failed (no valid rooms after `MaxGenerationAttempts`) |
 | 2 | invalid arguments |
+
+### Unit tests
+
+From `Algorithms/csharp/procgen-csharp/`:
+
+```sh
+dotnet test
+```
+
+Runs the 26 unit tests in `procgen-csharp.Tests`, the same tests as `cargo test` in the Rust generator. See [Test plan](docs/test-plan.md) and [Test report](docs/test-report.md).
 
 ## How it works
 
@@ -129,6 +139,7 @@ procgen-csharp/
 ├── README.md
 ├── procgen-csharp.sln
 ├── docs/                       developer documentation
+├── procgen-csharp.Tests/       xUnit tests, one class per Rust test module
 └── procgen-csharp/
     ├── procgen-csharp.csproj   console app, net8.0
     ├── Program.cs              entry point: arguments, pipeline, exit codes

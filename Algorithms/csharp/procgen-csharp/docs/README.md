@@ -20,6 +20,8 @@ All code references link to the exact lines in [`procgen-csharp/`](../procgen-cs
 | [Verification](verification.md) | How the C# output is compared with Rust, and the results |
 | [Design decisions](design-decisions.md) | C#-specific decisions and the differences from the Rust version |
 | [Roadmap and known issues](roadmap.md) | Progress, next steps, test ideas |
+| [Test plan](test-plan.md) | The unit tests (translated from Matt's Rust tests), why, and what is not tested (Dutch) |
+| [Test report](test-report.md) | Results of `dotnet test`, the check that the tests catch bugs, known issues (Dutch) |
 
 ## Code at a glance
 

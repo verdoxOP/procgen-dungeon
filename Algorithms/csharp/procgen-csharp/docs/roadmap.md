@@ -21,7 +21,7 @@ Port order follows the Rust generator (see [Architecture → Porting approach](a
 | `stats` (time and attempts per stage) | ⏳ next (not in Rust yet either) | | |
 | Corridors | ❌ cut from scope (also in Rust, `e3dc311`) | | |
 | Locked doors and keys | ⏳ only if Rust adds them | | |
-| Unit tests | ⏳ planned | | |
+| Unit tests | ✅ done: Matt's 26 Rust tests translated one to one, all pass | [`procgen-csharp.Tests`](../procgen-csharp.Tests), [Test plan](test-plan.md), [Test report](test-report.md) | same tests as Rust |
 | Runs in the game's `generators/` folder | ✅ done | [Output](output.md#running-in-the-game) | ✅ same dungeon as Rust in the game |
 
 ## Known issues
@@ -42,32 +42,23 @@ Differences from Rust that are deliberate (not bugs) are listed in [Design decis
 
 ## Test ideas
 
-Things to turn into unit tests (e.g. xUnit), most of them already checked by hand in [Verification](verification.md):
+Matt's 26 Rust tests are now translated to xUnit (see [Test plan](test-plan.md)). They already cover determinism, rooms in the map, overlap, room ids, `ValidateRooms`, the complete graph, the spanning tree, door walls and the tie, BFS, and PV-03 / PV-04 / PV-07.
+
+Still open: C#-specific tests and the checks that are only done by hand in [Verification](verification.md):
 
 | Test | Checks |
 |---|---|
 | `FromStateAndStream(42, 54)` gives the official PCG32 numbers | PCG core |
 | `FromSeed` + `RandomRange` give the recorded Rust numbers for a few seeds | seeding and range sampling |
 | `RandomRange(low, high)` stays within `low..=high` | range |
-| same seed twice → same rooms | determinism |
-| every room fits inside the map | room generation |
-| no two rooms overlap | VR-02 |
-| touching rooms don't count as overlap | `Room.Overlaps` |
-| room ids equal their index | `GenerateRooms` |
-| `ValidateRooms` rejects too few rooms, a too-small room, and two overlapping rooms | VR-01 – VR-03 |
 | seed 42 gives the same 18 rooms as Rust | regression against Rust |
-| n rooms give n · (n − 1) / 2 edges, each pair once, no self-loops | `GenerateEdges` |
 | every weight is within `MinWeight..=MaxWeight` | `GenerateEdges` |
-| the tree has n − 1 edges and reaches every room | `BuildTree` |
 | on equal weights the first edge in the list is chosen | `BuildTree` tie-break |
 | a small hand-made graph gives the known minimum spanning tree | `BuildTree` |
-| room B right of / left of / below / above room A gives right / left / bottom / top for A and the opposite for B | `EdgeToDoor` |
-| `\|dx\| = \|dy\|` gives a left/right door | `EdgeToDoor` tie |
 | one door per tree edge, in tree order | `GenerateDoors` |
-| BFS distances on a small hand-made tree; the furthest room wins, the lowest id on a tie | `Bfs` |
 | the JSON has the keys of `FORMAT.md` in Rust's order; walls are lowercase | `DungeonJson` |
 | seed 42 JSON equals a stored Rust JSON (except `generator`) | regression against Rust |
 | `EnemyCount`: 8 × 8 → 1, 20 × 20 → 6 | `Population` |
 | start room and empty rooms get no spawnables; the end room gets exactly one aggressive vampire | `PopulateDungeon` |
-| no two spawnables on the same tile; all inside a room and away from doors | PV-04, PV-05 |
+| all spawnables inside a room and away from doors | PV-05 |
 | `ValidatePopulation` rejects: no pickup, a spawn outside a room, an enemy in the start room, too many enemies | `ValidatePopulation` |

@@ -213,12 +213,12 @@ public static class Population
     }
 
     // The outer ring of a room is treated as wall, so spawns only go on the tiles inside it.
-    private static bool IsInsideRoom(Room room, int x, int y)
+    internal static bool IsInsideRoom(Room room, int x, int y)
     {
         return x > room.X && x < room.X + room.Width - 1 && y > room.Y && y < room.Y + room.Height - 1;
     }
 
-    private static Room? RoomAt(List<Room> rooms, int x, int y)
+    internal static Room? RoomAt(List<Room> rooms, int x, int y)
     {
         return rooms.FirstOrDefault(room => IsInsideRoom(room, x, y));
     }

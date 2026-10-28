@@ -8,4 +8,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <!-- The unit tests may use internal helpers, like Rust tests in the same file can. -->
+        <InternalsVisibleTo Include="procgen-csharp.Tests" />
+    </ItemGroup>
+
 </Project>
