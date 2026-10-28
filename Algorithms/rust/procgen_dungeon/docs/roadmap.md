@@ -20,7 +20,7 @@
 | Adjacency list from the tree | ⏳ next | |
 | Backbone validation | ⏳ planned | |
 | Corridors + corridor validation | ❌ cut — dropped from scope, see [Design decisions → Corridors](design-decisions.md#corridors) |
-| Unit tests | ⏳ planned | |
+| Unit tests | ✅ done | [Test plan](test-plan.md), [Test report](test-report.md) |
 
 ## Timeline
 
@@ -66,7 +66,6 @@
 | [`constants.rs` L3](../src/constants.rs#L3), [L12](../src/constants.rs#L12) | `mst` is unused, and its comment ("the fastest route to the exit") doesn't describe an MST |
 | [`constants.rs` L1–4](../src/constants.rs#L1-L4), [`edge.rs` L9–10](../src/edge.rs#L9-L10) | naming warnings: lowercase constants, `Ivertex1` / `Ivertex2` not snake_case |
 | [`population.rs`](../src/population.rs) | PV-01 / PV-02 are only checked as "at least one non-hostile pickup exists", not as separate `min_enemies` / `min_health` counts |
-| tests | no `#[test]` functions yet |
 
 ## Test ideas
 

@@ -18,6 +18,8 @@ All code references link to the exact lines in [`src/`](../src/).
 | [Design decisions](design-decisions.md) | Every decision, the options considered, and why |
 | [Theory](theory.md) | Graph theory background: graphs, trees, representations, BFS/DFS, Prim/Kruskal |
 | [Roadmap and known issues](roadmap.md) | Progress, timeline, open questions, known bugs, test ideas |
+| [Test plan](test-plan.md) | What I test, why, expected results, and what I don't test (Dutch) |
+| [Test report](test-report.md) | Results of `cargo test`, findings and known issues (Dutch) |
 | [Glossary](glossary.md) | Terms in English and Dutch |
 
 ## Code at a glance
