@@ -10,8 +10,8 @@ Rooms don't know their own role; the dungeon does (see [Rust → Design decision
 
 | Role | Rule | Code |
 |---|---|---|
-| start room | always room `0` | [`Program.cs` L72](../procgen-csharp/Program.cs#L72) |
-| end room | the room the **most doors away** from the start | [`Program.cs` L74–75](../procgen-csharp/Program.cs#L74-L75) |
+| start room | always room `0` | [`Program.cs` L144](../procgen-csharp/Program.cs#L144) |
+| end room | the room the **most doors away** from the start | [`Program.cs` L146–147](../procgen-csharp/Program.cs#L146-L147) |
 
 "Most doors away" means the player has to cross the most rooms to reach the exit. Since the backbone is a tree, there is exactly one route, so this distance is fixed.
 
@@ -35,7 +35,7 @@ Neither function draws random numbers.
 
 ## JSON output ([`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs))
 
-`DungeonJson.Build(...)` ([L19–50](../procgen-csharp/DungeonJson.cs#L19-L50)) turns the dungeon into the JSON the game reads: `format_version` 2, described in the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md). `Program` prints it to **stdout** ([L109](../procgen-csharp/Program.cs#L109)); that is the only thing on stdout.
+`DungeonJson.Build(...)` ([L19–50](../procgen-csharp/DungeonJson.cs#L19-L50)) turns the dungeon into the JSON the game reads: `format_version` 2, described in the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md). `Program` prints it to **stdout** ([L28](../procgen-csharp/Program.cs#L28)); that is the only thing on stdout.
 
 | Key | Value | Source |
 |---|---|---|
@@ -84,7 +84,15 @@ How it is measured:
 - The few log lines *inside* the steps (`Generated 18 rooms in 35 attempts`, validation messages) are timed, in both languages.
 - Process start-up and building the JSON are not timed. The game measures the whole process separately ("process ms").
 
-First result for seeds 0–999, one dungeon per process (the way the game runs it): **Rust about 0.075 ms, C# about 9.8 ms** per dungeon on average. Most of the C# time is JIT compilation: every method is compiled the first time it is called, and in a new process that is inside the timed steps (seed 42: `rooms_ms` 4.7 ms in C# against 0.03 ms in Rust). This is a real difference between the languages for this use, but it is not the speed of the algorithm itself. See [Design decisions → Target framework](design-decisions.md#target-framework).
+Results of the benchmark (`benchmark/` in the repository root, seeds 0–999, medians):
+
+| | Rust | C# | C# / Rust |
+|---|---|---|---|
+| cold `total_ms`: one dungeon per process, like the game | 0.070 ms | 9.5 ms | 136× |
+| cold `process_ms`: the whole process | 12.3 ms | 110 ms | 8.9× |
+| warm `total_ms`: one process, after 3 warmup passes | 0.024 ms | 0.069 ms | 2.9× |
+
+Cold, most of the C# time is JIT compilation: every method is compiled the first time it is called, and in a new process that happens inside the timed steps. Warm, that is gone and the algorithms themselves are compared: C# is faster at rooms and BFS, and slower mainly in population (4.3×). See [Design decisions → Target framework](design-decisions.md#target-framework) and the full tables in `benchmark/results/summary.md`.
 
 ## Running in the game
 

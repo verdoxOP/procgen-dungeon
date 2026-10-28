@@ -75,7 +75,7 @@ The overlap loop checks every **pair** once (`j` starts at `i + 1`).
 
 As in Rust, `GenerateRooms` can't produce rooms that are too small or overlap, so in practice only the count check can fail. The other checks are a safety net in case generation changes later. See [Validation rules](validation-rules.md).
 
-## Retry loop ([`Program.cs` L18–34](../procgen-csharp/Program.cs#L18-L34))
+## Retry loop ([`Program.cs` L77–94](../procgen-csharp/Program.cs#L77-L94))
 
 ```
 rooms = GenerateRooms(rng)

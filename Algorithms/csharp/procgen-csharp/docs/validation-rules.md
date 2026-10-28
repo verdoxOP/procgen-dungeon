@@ -13,7 +13,7 @@ The rules, their origin in the brainstorm document and the full list (VR, BV, CV
 | VR-03 | at least N rooms must be successfully generated | ✅ | [`Validation.cs` L9–13](../procgen-csharp/Validation.cs#L9-L13) |
 | VR-04 | minimum room width and height must be configurable | ✅ | [`Constants.cs` L13–14](../procgen-csharp/Constants.cs#L13-L14) |
 
-On failure the whole room set is regenerated with the same RNG, up to `MaxGenerationAttempts` times ([`Program.cs` L22–27](../procgen-csharp/Program.cs#L22-L27)). If it is still invalid, the program exits with code 1 ([L30–34](../procgen-csharp/Program.cs#L30-L34)).
+On failure the whole room set is regenerated with the same RNG, up to `MaxGenerationAttempts` times ([`Program.cs` L82–87](../procgen-csharp/Program.cs#L82-L87)). If it is still invalid, the program exits with code 1 ([L90–94](../procgen-csharp/Program.cs#L90-L94)).
 
 The checks run in the same order as in Rust and stop at the first failure. The order doesn't affect the dungeon (validation draws no random numbers), only which reason is printed.
 
