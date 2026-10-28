@@ -26,9 +26,9 @@ C# generator → validated dungeon data → JSON → Godot
 | Stage | Status | Code |
 |---|---|---|
 | Seeded, deterministic RNG (port of Rust's `Pcg32`) | ✅ done, identical to Rust | [`Pcg32.cs`](procgen-csharp/Pcg32.cs) |
-| Command line (`--seed`, exit codes) | ✅ done | [`Program.cs` L6–12](procgen-csharp/Program.cs#L6-L12) |
+| Command line (`--seed`, exit codes) | ✅ done | [`Program.cs` L7–13](procgen-csharp/Program.cs#L7-L13) |
 | Room generation (random size and position, no overlap) | ✅ done, identical to Rust | [`RoomGeneration.cs`](procgen-csharp/RoomGeneration.cs) |
-| Room validation + retry loop | ✅ done, identical to Rust | [`Validation.cs`](procgen-csharp/Validation.cs), [`Program.cs` L14–29](procgen-csharp/Program.cs#L14-L29) |
+| Room validation + retry loop | ✅ done, identical to Rust | [`Validation.cs`](procgen-csharp/Validation.cs), [`Program.cs` L18–34](procgen-csharp/Program.cs#L18-L34) |
 | Candidate edges (complete graph, random weights) | ✅ done, identical to Rust | [`EdgeGeneration.cs`](procgen-csharp/EdgeGeneration.cs) |
 | Backbone with Prim's algorithm | ✅ done, identical to Rust | [`SpanningTree.cs`](procgen-csharp/SpanningTree.cs) |
 | Doors (wall per connection) | ✅ done, identical to Rust | [`DoorGeneration.cs`](procgen-csharp/DoorGeneration.cs) |
@@ -36,7 +36,7 @@ C# generator → validated dungeon data → JSON → Godot
 | JSON export to stdout | ✅ done, identical to Rust | [`DungeonJson.cs`](procgen-csharp/DungeonJson.cs) |
 | Runs in the Godot game | ✅ done | see [Output](docs/output.md#running-in-the-game) |
 | Population + population validation | ✅ done, identical to Rust | [`Population.cs`](procgen-csharp/Population.cs) |
-| `stats` (time and attempts per stage) | ⏳ next (not in Rust yet either) | |
+| `stats` (time per step and attempts) | ✅ done, same keys as Rust | [`GenerationStats.cs`](procgen-csharp/GenerationStats.cs), see [Output](docs/output.md#stats-time-per-step) |
 | Corridors | ❌ cut from scope (also in Rust) | |
 | Unit tests (same 26 tests as Rust) | ✅ done, all pass | [`procgen-csharp.Tests`](procgen-csharp.Tests), see [Test plan](docs/test-plan.md) |
 
@@ -156,6 +156,7 @@ procgen-csharp/
     ├── Bfs.cs                  RoomDistances / FurthestRoom (end room)
     ├── Spawnable.cs            Spawnable records (enemy, health, ammo, buff)
     ├── Population.cs           room kinds, spawning, population validation
+    ├── GenerationStats.cs      time per step + generation attempts ("stats" in the JSON)
     └── DungeonJson.cs          Build: the dungeon as JSON (format version 2)
 ```
 

@@ -31,7 +31,7 @@ An abstract record with `X` and `Y` (tile position), and one record per kind:
 | `AmmoSpawn` | `Amount` (10) | `"ammo"` | `Spawnable::Ammo` |
 | `BuffSpawn` | `Buff` (`"damage_up"`) | `"buff"` | `Spawnable::Buff` |
 
-`IsHostile` is `true` for enemies only. The names are the ones the game knows (see the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md)). A C# record hierarchy is the natural match for Rust's enum with data per variant; the JSON writer turns each record into `{"type": ..., "x", "y", ...}` with only that kind's fields ([`DungeonJson.cs` L52–62](../procgen-csharp/DungeonJson.cs#L52-L62)), like serde's tagged enum.
+`IsHostile` is `true` for enemies only. The names are the ones the game knows (see the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md)). A C# record hierarchy is the natural match for Rust's enum with data per variant; the JSON writer turns each record into `{"type": ..., "x", "y", ...}` with only that kind's fields ([`DungeonJson.cs` L53–63](../procgen-csharp/DungeonJson.cs#L53-L63)), like serde's tagged enum.
 
 ## Step 1: room kinds — `ChooseRoomKinds` ([L78–111](../procgen-csharp/Population.cs#L78-L111))
 

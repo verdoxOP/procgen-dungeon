@@ -92,4 +92,4 @@ The contract says exit 1 = generation failed, so the game can show an error inst
 | ✅ | **`net8.0`** (kept from the original project) |
 | ❓ | Whether to measure with a newer runtime or as a native AOT build for the comparison. |
 
-.NET 8 is a long-term support release. Native AOT would make start-up faster, which matters for the "process time" the game measures, but not for the generator's own timing (`stats`).
+.NET 8 is a long-term support release. The generator's own timing (`stats`) turned out to depend on this choice too: the game starts a new process for every dungeon, so every method is JIT-compiled the first time it runs, inside the timed steps. That makes one C# dungeon about 10 ms against about 0.075 ms for Rust (seeds 0–999, see [Output → Stats](output.md#stats-time-per-step)). Native AOT compiles ahead of time and would remove most of that, so it is a fair option to measure as well.

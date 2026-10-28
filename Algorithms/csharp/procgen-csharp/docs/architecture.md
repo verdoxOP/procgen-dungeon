@@ -27,7 +27,7 @@ The port is built **class by class, in the same order as the Rust generator was 
 | 7 | JSON export (997fb86) | [`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs) | ✅ |
 | 8 | BFS end room (4d0fb94) | [`Bfs.cs`](../procgen-csharp/Bfs.cs) | ✅ (together with 7: the JSON needs the end room) |
 | 9 | population + validation (5eeafce) | [`Population.cs`](../procgen-csharp/Population.cs), [`Spawnable.cs`](../procgen-csharp/Spawnable.cs) | ✅ |
-| 10 | `stats` (not in Rust yet) | | ⏳ next |
+| 10 | `stats` (added to Rust and C# together) | [`GenerationStats.cs`](../procgen-csharp/GenerationStats.cs), [`Program.cs`](../procgen-csharp/Program.cs) | ✅ |
 | — | corridors | | ❌ cut from scope (e3dc311) |
 
 After each step, the C# output is compared with the Rust output for the same seeds (see [Verification](verification.md)). A step is only done when the output is identical.
@@ -58,24 +58,24 @@ flowchart LR
 
 ### Planned
 
-Same as Rust: rooms → validate → edges → Prim backbone → doors → BFS end room → JSON on stdout. Corridors, population and stats follow once they exist in the Rust version.
+Same as Rust: rooms → validate → edges → Prim backbone → doors → BFS end room → JSON on stdout. Population and stats were added the same way; corridors were cut from scope.
 
 ## Data flow in `Program`
 
 | Step | Call | Produces | Code |
 |---|---|---|---|
-| 1 | parse `--seed` | `seed: ulong`, or exit 2 | [L6–10](../procgen-csharp/Program.cs#L6-L10) |
-| 2 | `Pcg32.FromSeed(seed)` | `rng: Pcg32` | [L12](../procgen-csharp/Program.cs#L12) |
-| 3 | `GenerateRooms` in a retry loop with `ValidateRooms` | `rooms: List<Room>` | [L14–23](../procgen-csharp/Program.cs#L14-L23) |
-| 4 | still invalid after all attempts | exit 1 | [L25–29](../procgen-csharp/Program.cs#L25-L29) |
-| 5 | print rooms | stderr | [L31–35](../procgen-csharp/Program.cs#L31-L35) |
-| 6 | `EdgeGeneration.GenerateEdges(rng, rooms)` | `edges: List<Edge>` (complete graph) | [L38–43](../procgen-csharp/Program.cs#L38-L43) |
-| 7 | `SpanningTree.BuildTree(edges, rooms.Count)` | `tree: List<Edge>` (n − 1 edges) | [L46–51](../procgen-csharp/Program.cs#L46-L51) |
-| 8 | `DoorGeneration.GenerateDoors(tree, rooms)` | `doors: List<Door>` (one per tree edge) | [L54–58](../procgen-csharp/Program.cs#L54-L58) |
-| 9 | `Bfs.RoomDistances` + `Bfs.FurthestRoom` | `startRoom = 0`, `endRoom` | [L61–63](../procgen-csharp/Program.cs#L61-L63) |
-| 10 | `Population.PopulateDungeon(rng, rooms, doors, start, end)` | room kinds, `spawnables` | [L66–71](../procgen-csharp/Program.cs#L66-L71) |
-| 11 | `Population.ValidatePopulation(...)` | exit 1 if invalid | [L73–77](../procgen-csharp/Program.cs#L73-L77) |
-| 12 | `DungeonJson.Build(...)` | JSON on stdout | [L80](../procgen-csharp/Program.cs#L80) |
+| 1 | parse `--seed` | `seed: ulong`, or exit 2 | [L7–11](../procgen-csharp/Program.cs#L7-L11) |
+| 2 | `Pcg32.FromSeed(seed)` | `rng: Pcg32` | [L13](../procgen-csharp/Program.cs#L13) |
+| 3 | `GenerateRooms` in a retry loop with `ValidateRooms` | `rooms: List<Room>` | [L18–28](../procgen-csharp/Program.cs#L18-L28) |
+| 4 | still invalid after all attempts | exit 1 | [L30–34](../procgen-csharp/Program.cs#L30-L34) |
+| 5 | print rooms | stderr | [L36–40](../procgen-csharp/Program.cs#L36-L40) |
+| 6 | `EdgeGeneration.GenerateEdges(rng, rooms)` | `edges: List<Edge>` (complete graph) | [L42–50](../procgen-csharp/Program.cs#L42-L50) |
+| 7 | `SpanningTree.BuildTree(edges, rooms.Count)` | `tree: List<Edge>` (n − 1 edges) | [L52–60](../procgen-csharp/Program.cs#L52-L60) |
+| 8 | `DoorGeneration.GenerateDoors(tree, rooms)` | `doors: List<Door>` (one per tree edge) | [L62–69](../procgen-csharp/Program.cs#L62-L69) |
+| 9 | `Bfs.RoomDistances` + `Bfs.FurthestRoom` | `startRoom = 0`, `endRoom` | [L71–77](../procgen-csharp/Program.cs#L71-L77) |
+| 10 | `Population.PopulateDungeon(rng, rooms, doors, start, end)` | room kinds, `spawnables` | [L79–86](../procgen-csharp/Program.cs#L79-L86) |
+| 11 | `Population.ValidatePopulation(...)` | exit 1 if invalid | [L88–96](../procgen-csharp/Program.cs#L88-L96) |
+| 12 | `new GenerationStats { ... }` + `DungeonJson.Build(...)` | JSON with `stats` on stdout | [L98–109](../procgen-csharp/Program.cs#L98-L109) |
 
 The same `rng` object is passed to every random step. C# classes are reference types, so passing `rng` to a method is the same as Rust's `&mut rng`: the method advances the one shared generator.
 
