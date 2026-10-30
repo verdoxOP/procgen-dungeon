@@ -4,11 +4,14 @@ namespace procgen_csharp;
 // One record per kind, like the variants of the Spawnable enum in population.rs.
 public abstract record Spawnable(int X, int Y)
 {
-    // Enemies are hostile; pickups are not.
-    public bool IsHostile => this is EnemySpawn;
+    // Enemies are hostile; pickups are not. EnemySpawn overrides this.
+    public virtual bool IsHostile => false;
 }
 
-public sealed record EnemySpawn(int X, int Y, string Enemy, string Behaviour) : Spawnable(X, Y);
+public sealed record EnemySpawn(int X, int Y, string Enemy, string Behaviour) : Spawnable(X, Y)
+{
+    public override bool IsHostile => true;
+}
 
 public sealed record HealthSpawn(int X, int Y, int Amount) : Spawnable(X, Y);
 

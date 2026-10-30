@@ -16,14 +16,14 @@ Static program analysis of both generators, counted by `benchmark/code-size.mjs`
 | Spanning tree (Prim) | `tree.rs` | 26 | 20 | `SpanningTree.cs` | 30 | 18 | 0.90× |
 | Doors | `door.rs` | 58 | 49 | `Door.cs`, `DoorGeneration.cs` | 64 | 42 | 0.86× |
 | BFS end room | `bfs.rs` | 31 | 23 | `Bfs.cs` | 46 | 26 | 1.13× |
-| Population + validation | `population.rs` | 262 | 202 | `Spawnable.cs`, `Population.cs` | 227 | 135 | 0.67× |
+| Population + validation | `population.rs` | 262 | 202 | `Spawnable.cs`, `Population.cs` | 234 | 138 | 0.68× |
 | JSON + stats | `dungeon_json.rs` | 53 | 49 | `DungeonJson.cs`, `GenerationStats.cs` | 109 | 83 | 1.69× |
 | Constants | `constants.rs` | 17 | 17 | `Constants.cs` | 20 | 18 | 1.06× |
 | Main (arguments, pipeline, benchmark mode) | `main.rs` | 209 | 171 | `Program.cs`, `GeneratedDungeon.cs` | 171 | 119 | 0.70× |
-| **Total** | | **765** | **618** | | **860** | **562** | **0.91×** |
-| Total without the RNG | | 765 | 618 | | 792 | 518 | 0.84× |
+| **Total** | | **765** | **618** | | **867** | **565** | **0.91×** |
+| Total without the RNG | | 765 | 618 | | 799 | 521 | 0.84× |
 
-Comment lines: Rust 46, C# 99.
+Comment lines: Rust 46, C# 100.
 
 Not counted above: Rust's debug output (`grid.rs`, `tree_visualization.rs`, 73 code lines), which C# doesn't have.
 

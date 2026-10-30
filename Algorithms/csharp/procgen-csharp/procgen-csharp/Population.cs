@@ -30,48 +30,53 @@ public static class Population
         {
             List<(int X, int Y)> doorTiles = DoorTilesOfRoom(room.Id, rooms, doors);
             List<(int X, int Y)> tiles = SpawnTiles(room, doorTiles);
-
-            switch (kinds[room.Id])
-            {
-                case RoomKind.Start:
-                case RoomKind.Empty:
-                    break;
-
-                case RoomKind.End:
-                    // The boss guards the exit.
-                    if (TakeRandomTile(rng, tiles) is (int bx, int by))
-                    {
-                        spawnables.Add(new EnemySpawn(bx, by, BossKind, "aggressive"));
-                    }
-                    break;
-
-                case RoomKind.Enemy:
-                    for (int i = 0; i < EnemyCount(room); i++)
-                    {
-                        // Order of random calls: tile, then enemy kind, then behaviour.
-                        if (TakeRandomTile(rng, tiles) is (int ex, int ey))
-                        {
-                            string kind = EnemyKinds[rng.RandomRange(0, EnemyKinds.Length - 1)];
-                            spawnables.Add(new EnemySpawn(ex, ey, kind, RandomBehaviour(rng)));
-                        }
-                    }
-                    break;
-
-                case RoomKind.Item:
-                    if (TakeRandomTile(rng, tiles) is (int ix, int iy))
-                    {
-                        spawnables.Add(rng.RandomRange(0, 2) switch
-                        {
-                            0 => new HealthSpawn(ix, iy, HealthAmount),
-                            1 => new AmmoSpawn(ix, iy, AmmoAmount),
-                            _ => new BuffSpawn(ix, iy, BuffName),
-                        });
-                    }
-                    break;
-            }
+            PopulateRoom(rng, room, kinds[room.Id], tiles, spawnables);
         }
 
         return (kinds, spawnables);
+    }
+
+    // Fills one room according to its kind, taking tiles from `tiles`. Same random calls in the same order as Rust.
+    private static void PopulateRoom(Pcg32 rng, Room room, RoomKind roomKind, List<(int X, int Y)> tiles, List<Spawnable> spawnables)
+    {
+        switch (roomKind)
+        {
+            case RoomKind.Start:
+            case RoomKind.Empty:
+                break;
+
+            case RoomKind.End:
+                // The boss guards the exit.
+                if (TakeRandomTile(rng, tiles) is (int bx, int by))
+                {
+                    spawnables.Add(new EnemySpawn(bx, by, BossKind, "aggressive"));
+                }
+                break;
+
+            case RoomKind.Enemy:
+                for (int i = 0; i < EnemyCount(room); i++)
+                {
+                    // Order of random calls: tile, then enemy kind, then behaviour.
+                    if (TakeRandomTile(rng, tiles) is (int ex, int ey))
+                    {
+                        string kind = EnemyKinds[rng.RandomRange(0, EnemyKinds.Length - 1)];
+                        spawnables.Add(new EnemySpawn(ex, ey, kind, RandomBehaviour(rng)));
+                    }
+                }
+                break;
+
+            case RoomKind.Item:
+                if (TakeRandomTile(rng, tiles) is (int ix, int iy))
+                {
+                    spawnables.Add(rng.RandomRange(0, 2) switch
+                    {
+                        0 => new HealthSpawn(ix, iy, HealthAmount),
+                        1 => new AmmoSpawn(ix, iy, AmmoAmount),
+                        _ => new BuffSpawn(ix, iy, BuffName),
+                    });
+                }
+                break;
+        }
     }
 
     // Start and end room are fixed; every other room rolls Enemy / Item / Empty.

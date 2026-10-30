@@ -31,22 +31,22 @@ An abstract record with `X` and `Y` (tile position), and one record per kind:
 | `AmmoSpawn` | `Amount` (10) | `"ammo"` | `Spawnable::Ammo` |
 | `BuffSpawn` | `Buff` (`"damage_up"`) | `"buff"` | `Spawnable::Buff` |
 
-`IsHostile` is `true` for enemies only. The names are the ones the game knows (see the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md)). A C# record hierarchy is the natural match for Rust's enum with data per variant; the JSON writer turns each record into `{"type": ..., "x", "y", ...}` with only that kind's fields ([`DungeonJson.cs` L53–63](../procgen-csharp/DungeonJson.cs#L53-L63)), like serde's tagged enum.
+`IsHostile` is `true` for enemies only: `Spawnable` returns `false` and `EnemySpawn` overrides it. The names are the ones the game knows (see the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md)). A C# record hierarchy is the natural match for Rust's enum with data per variant; the JSON writer turns each record into `{"type": ..., "x", "y", ...}` with only that kind's fields ([`DungeonJson.cs` L53–63](../procgen-csharp/DungeonJson.cs#L53-L63)), like serde's tagged enum.
 
-## Step 1: room kinds — `ChooseRoomKinds` ([L78–111](../procgen-csharp/Population.cs#L78-L111))
+## Step 1: room kinds — `ChooseRoomKinds` ([L83–116](../procgen-csharp/Population.cs#L83-L116))
 
-1. In id order: room 0 is `Start`, the end room is `End`, every other room rolls `0..=99` ([`RandomRoomKind`](../procgen-csharp/Population.cs#L178-L190)): below `EnemyRoomChance` (60) → `Enemy`, below 60 + `ItemRoomChance` (15) → `Item`, otherwise `Empty`.
-2. **Fallback** ([L98–109](../procgen-csharp/Population.cs#L98-L109)): if no room rolled `Item`, a random normal room (not start or end) becomes an item room, so every run has something to pick up. This happens often: in 164 of the first 1000 seeds.
+1. In id order: room 0 is `Start`, the end room is `End`, every other room rolls `0..=99` ([`RandomRoomKind`](../procgen-csharp/Population.cs#L183-L195)): below `EnemyRoomChance` (60) → `Enemy`, below 60 + `ItemRoomChance` (15) → `Item`, otherwise `Empty`.
+2. **Fallback** ([L103–114](../procgen-csharp/Population.cs#L103-L114)): if no room rolled `Item`, a random normal room (not start or end) becomes an item room, so every run has something to pick up. This happens often: in 164 of the first 1000 seeds.
 
 ## Step 2: free tiles per room
 
-- **Inside tiles only** ([`IsInsideRoom`](../procgen-csharp/Population.cs#L216-L219), [`SpawnTiles`](../procgen-csharp/Population.cs#L250-L264)): the outer ring of the room's floor is skipped, so nothing spawns against a wall.
-- **Not near a door** ([`IsNearDoor`](../procgen-csharp/Population.cs#L244-L247)): the door tile and the 8 tiles around it are skipped. The door tile is the **middle** of the wall on the room's own outer ring ([`DoorTile`](../procgen-csharp/Population.cs#L122-L131)). See [Known issue](#known-issue-spawns-next-to-doors) below.
+- **Inside tiles only** ([`IsInsideRoom`](../procgen-csharp/Population.cs#L221-L224), [`SpawnTiles`](../procgen-csharp/Population.cs#L255-L269)): the outer ring of the room's floor is skipped, so nothing spawns against a wall.
+- **Not near a door** ([`IsNearDoor`](../procgen-csharp/Population.cs#L249-L252)): the door tile and the 8 tiles around it are skipped. The door tile is the **middle** of the wall on the room's own outer ring ([`DoorTile`](../procgen-csharp/Population.cs#L127-L136)). See [Known issue](#known-issue-spawns-next-to-doors) below.
 - Tiles are listed **row by row** (`y` outer, `x` inner), the same order as Rust. The order matters, because tiles are picked by index.
 
-## Step 3: spawning — `PopulateDungeon` ([L23–75](../procgen-csharp/Population.cs#L23-L75))
+## Step 3: spawning — `PopulateDungeon` + `PopulateRoom` ([L23–80](../procgen-csharp/Population.cs#L23-L80))
 
-For every room, in id order:
+For every room, in id order (`PopulateDungeon` finds the free tiles, `PopulateRoom` fills the room by its kind):
 
 | Kind | Random calls, in order |
 |---|---|
@@ -55,11 +55,11 @@ For every room, in id order:
 | `Enemy` | for each of `EnemyCount(room)` enemies: a tile, an enemy kind (`0..=2`), a behaviour (`0..=99` < `AggressiveChance` = aggressive) |
 | `Item` | a tile, then the item (`0..=2`: health, ammo, buff) |
 
-**`EnemyCount(room)`** ([L114–118](../procgen-csharp/Population.cs#L114-L118)): inside area `(width − 2) · (height − 2)` divided by `TilesPerEnemy` (40), clamped to `1..=MaxEnemiesPerRoom` (6). An 8 × 8 room gets 1 enemy, a 20 × 20 room 6.
+**`EnemyCount(room)`** ([L119–123](../procgen-csharp/Population.cs#L119-L123)): inside area `(width − 2) · (height − 2)` divided by `TilesPerEnemy` (40), clamped to `1..=MaxEnemiesPerRoom` (6). An 8 × 8 room gets 1 enemy, a 20 × 20 room 6.
 
-**`TakeRandomTile`** ([L200–213](../procgen-csharp/Population.cs#L200-L213)) picks a random index, takes that tile, and moves the **last** tile into the gap, like Rust's `Vec::swap_remove`. This is O(1) and guarantees two spawns never share a tile. A plain `List.RemoveAt(index)` would shift all later tiles instead, so the next pick would land on a different tile than in Rust.
+**`TakeRandomTile`** ([L205–218](../procgen-csharp/Population.cs#L205-L218)) picks a random index, takes that tile, and moves the **last** tile into the gap, like Rust's `Vec::swap_remove`. This is O(1) and guarantees two spawns never share a tile. A plain `List.RemoveAt(index)` would shift all later tiles instead, so the next pick would land on a different tile than in Rust.
 
-## Step 4: validation — `ValidatePopulation` ([L133–175](../procgen-csharp/Population.cs#L133-L175))
+## Step 4: validation — `ValidatePopulation` ([L138–180](../procgen-csharp/Population.cs#L138-L180))
 
 Fails (exit code 1, no retry, same as Rust) when:
 

@@ -174,7 +174,7 @@ Position and size can only be set when the room is created (`init`), because the
 | [`BuildTree`](../procgen-csharp/SpanningTree.cs#L8-L40) | O(n · E) = O(n³) on a complete graph | 19 × 190 ≈ 3600 edge checks |
 | [`GenerateDoors`](../procgen-csharp/DoorGeneration.cs#L6-L9) | O(n) | 19 doors |
 | [`RoomDistances`](../procgen-csharp/Bfs.cs#L7-L40) | O(n) on a tree | 20 rooms, 19 doors |
-| [`PopulateDungeon`](../procgen-csharp/Population.cs#L23-L75) | O(tiles · doors) per room | ≤ 18 × 18 inside tiles per room |
-| [`ValidatePopulation`](../procgen-csharp/Population.cs#L133-L175) | O(n · spawnables) | 20 rooms × ~25 spawnables |
+| [`PopulateDungeon`](../procgen-csharp/Population.cs#L23-L80) | O(tiles · doors) per room | ≤ 18 × 18 inside tiles per room |
+| [`ValidatePopulation`](../procgen-csharp/Population.cs#L138-L180) | O(n · spawnables) | 20 rooms × ~25 spawnables |
 
 Same as the Rust version, since the algorithm is the same.

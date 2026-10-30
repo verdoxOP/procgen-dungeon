@@ -65,7 +65,7 @@ Everything below is printed to **stderr**, in order:
 | 7 | every door with its walls, e.g. `Door 0-15: bottom/top` | [`Program.cs` L123–126](../procgen-csharp/Program.cs#L123-L126), [`Door.ToString`](../procgen-csharp/Door.cs#L21-L24) |
 | 8 | `Start room 0, end room 6 (12 doors away)` | [`Program.cs` L136](../procgen-csharp/Program.cs#L136) |
 | 9 | the kind of every room, e.g. `Room 3 is Enemy` | [`Program.cs` L143–146](../procgen-csharp/Program.cs#L143-L146) |
-| 10 | the reason, if population validation fails (then exit 1) | [`Population.ValidatePopulation`](../procgen-csharp/Population.cs#L133-L175) |
+| 10 | the reason, if population validation fails (then exit 1) | [`Population.ValidatePopulation`](../procgen-csharp/Population.cs#L138-L180) |
 
 On **stdout** comes only the dungeon JSON. To see just the JSON, or just the logs:
 

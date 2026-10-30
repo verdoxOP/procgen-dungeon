@@ -38,7 +38,7 @@ const RUST_DEBUG = ["grid.rs", "tree_visualization.rs"];
 const CSHARP_TEST_FILES = ["RoomTests.cs", "RoomGenerationTests.cs", "ValidationTests.cs", "EdgeGenerationTests.cs",
   "SpanningTreeTests.cs", "DoorGenerationTests.cs", "BfsTests.cs", "PopulationTests.cs", "TestDungeon.cs"];
 
-const BRACKETS_ONLY = /^[{}()\[\];,]+$/;
+const BRACKETS_ONLY = /^[{}()[\];,]+$/;
 
 function countLines(lines) {
   const result = { code: 0, logic: 0, comments: 0 };
@@ -74,6 +74,7 @@ function csharpFile(dir, name) {
 
 const add = (a, b) => ({ code: a.code + b.code, logic: a.logic + b.logic, comments: a.comments + b.comments });
 const zero = () => ({ code: 0, logic: 0, comments: 0 });
+const asCode = (file) => "`" + file + "`";
 const ratio = (cs, rs) => (rs > 0 ? (cs / rs).toFixed(2) + "×" : "–");
 
 const outDir = process.argv[2] === "--out" ? path.resolve(process.argv[3]) : path.join(repoRoot, "benchmark", "results");
@@ -91,7 +92,9 @@ for (const { step, rust, csharp } of STEPS) {
   for (const f of csharp) c = add(c, csharpFile(csharpSrc, f));
   rustTotal = add(rustTotal, r);
   csharpTotal = add(csharpTotal, c);
-  rows.push(`| ${step} | ${rust.map((f) => `\`${f}\``).join(", ") || "*(crates `rand`, `rand_pcg`)*"} | ${r.code} | ${r.logic} | ${csharp.map((f) => `\`${f}\``).join(", ")} | ${c.code} | ${c.logic} | ${ratio(c.logic, r.logic)} |`);
+  const rustFiles = rust.map(asCode).join(", ") || "*(crates `rand`, `rand_pcg`)*";
+  const csharpFiles = csharp.map(asCode).join(", ");
+  rows.push(`| ${step} | ${rustFiles} | ${r.code} | ${r.logic} | ${csharpFiles} | ${c.code} | ${c.logic} | ${ratio(c.logic, r.logic)} |`);
 }
 
 let rustDebug = zero();
