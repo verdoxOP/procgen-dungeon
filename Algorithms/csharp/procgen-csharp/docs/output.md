@@ -10,8 +10,8 @@ Rooms don't know their own role; the dungeon does (see [Rust → Design decision
 
 | Role | Rule | Code |
 |---|---|---|
-| start room | always room `0` | [`Program.cs` L144](../procgen-csharp/Program.cs#L144) |
-| end room | the room the **most doors away** from the start | [`Program.cs` L146–147](../procgen-csharp/Program.cs#L146-L147) |
+| start room | always room `0` | [`Program.cs` L129](../procgen-csharp/Program.cs#L129) |
+| end room | the room the **most doors away** from the start | [`Program.cs` L131–132](../procgen-csharp/Program.cs#L131-L132) |
 
 "Most doors away" means the player has to cross the most rooms to reach the exit. Since the backbone is a tree, there is exactly one route, so this distance is fixed.
 

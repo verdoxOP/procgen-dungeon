@@ -40,5 +40,5 @@ All code references link to the exact lines in [`procgen-csharp/`](../procgen-cs
 | [`DoorGeneration.cs`](../procgen-csharp/DoorGeneration.cs) | wall per door | [`GenerateDoors`](../procgen-csharp/DoorGeneration.cs#L6-L9), [`EdgeToDoor`](../procgen-csharp/DoorGeneration.cs#L14-L47) |
 | [`Bfs.cs`](../procgen-csharp/Bfs.cs) | end room | [`RoomDistances`](../procgen-csharp/Bfs.cs#L7-L40), [`FurthestRoom`](../procgen-csharp/Bfs.cs#L43-L55) |
 | [`Spawnable.cs`](../procgen-csharp/Spawnable.cs) | spawnable data types | `Spawnable`, `EnemySpawn`, `HealthSpawn`, `AmmoSpawn`, `BuffSpawn` |
-| [`Population.cs`](../procgen-csharp/Population.cs) | population | [`PopulateDungeon`](../procgen-csharp/Population.cs#L23-L75), [`ChooseRoomKinds`](../procgen-csharp/Population.cs#L78-L111), [`ValidatePopulation`](../procgen-csharp/Population.cs#L133-L175) |
+| [`Population.cs`](../procgen-csharp/Population.cs) | population | [`PopulateDungeon`](../procgen-csharp/Population.cs#L23-L80), [`ChooseRoomKinds`](../procgen-csharp/Population.cs#L83-L116), [`ValidatePopulation`](../procgen-csharp/Population.cs#L138-L180) |
 | [`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs) | JSON output | [`Build`](../procgen-csharp/DungeonJson.cs#L19-L50) |

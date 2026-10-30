@@ -19,7 +19,7 @@ The checks run in the same order as in Rust and stop at the first failure. The o
 
 ## PV: population validation
 
-Same checks as `validate_population` in Rust ([`Population.ValidatePopulation`](../procgen-csharp/Population.cs#L133-L175)). On failure the program exits with code 1; there is no retry (also as in Rust).
+Same checks as `validate_population` in Rust ([`Population.ValidatePopulation`](../procgen-csharp/Population.cs#L138-L180)). On failure the program exits with code 1; there is no retry (also as in Rust).
 
 | Rule | Description | Status | How |
 |---|---|---|---|

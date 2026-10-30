@@ -17,11 +17,11 @@ All tunable values are in [`Constants.cs`](../procgen-csharp/Constants.cs). They
 | [`MapWidth`](../procgen-csharp/Constants.cs#L18) | 100 | [`GenerateRoom`](../procgen-csharp/RoomGeneration.cs#L41) | map width in tiles | `MAP_WIDTH` |
 | [`MapHeight`](../procgen-csharp/Constants.cs#L19) | 100 | [`GenerateRoom`](../procgen-csharp/RoomGeneration.cs#L42) | map height in tiles | `MAP_HEIGHT` |
 | [`FormatVersion`](../procgen-csharp/Constants.cs#L21) | 2 | [`DungeonJson`](../procgen-csharp/DungeonJson.cs#L23) | JSON format version | `FORMAT_VERSION` |
-| [`EnemyRoomChance`](../procgen-csharp/Constants.cs#L25) | 60 | [`RandomRoomKind`](../procgen-csharp/Population.cs#L178-L190) | chance (of 100) a normal room is an enemy room | `ENEMY_ROOM_CHANCE` |
-| [`ItemRoomChance`](../procgen-csharp/Constants.cs#L26) | 15 | [`RandomRoomKind`](../procgen-csharp/Population.cs#L178-L190) | chance an item room (the rest is empty) | `ITEM_ROOM_CHANCE` |
-| [`TilesPerEnemy`](../procgen-csharp/Constants.cs#L28) | 40 | [`EnemyCount`](../procgen-csharp/Population.cs#L114-L118) | one enemy per this many inside tiles | `TILES_PER_ENEMY` |
-| [`MaxEnemiesPerRoom`](../procgen-csharp/Constants.cs#L29) | 6 | [`EnemyCount`](../procgen-csharp/Population.cs#L114-L118) | upper limit of enemies per room | `MAX_ENEMIES_PER_ROOM` |
-| [`AggressiveChance`](../procgen-csharp/Constants.cs#L31) | 70 | [`RandomBehaviour`](../procgen-csharp/Population.cs#L192-L195) | chance an enemy is aggressive | `AGGRESSIVE_CHANCE` |
+| [`EnemyRoomChance`](../procgen-csharp/Constants.cs#L25) | 60 | [`RandomRoomKind`](../procgen-csharp/Population.cs#L183-L195) | chance (of 100) a normal room is an enemy room | `ENEMY_ROOM_CHANCE` |
+| [`ItemRoomChance`](../procgen-csharp/Constants.cs#L26) | 15 | [`RandomRoomKind`](../procgen-csharp/Population.cs#L183-L195) | chance an item room (the rest is empty) | `ITEM_ROOM_CHANCE` |
+| [`TilesPerEnemy`](../procgen-csharp/Constants.cs#L28) | 40 | [`EnemyCount`](../procgen-csharp/Population.cs#L119-L123) | one enemy per this many inside tiles | `TILES_PER_ENEMY` |
+| [`MaxEnemiesPerRoom`](../procgen-csharp/Constants.cs#L29) | 6 | [`EnemyCount`](../procgen-csharp/Population.cs#L119-L123) | upper limit of enemies per room | `MAX_ENEMIES_PER_ROOM` |
+| [`AggressiveChance`](../procgen-csharp/Constants.cs#L31) | 70 | [`RandomBehaviour`](../procgen-csharp/Population.cs#L197-L200) | chance an enemy is aggressive | `AGGRESSIVE_CHANCE` |
 
 Edge weights use two named constants in [`EdgeGeneration`](../procgen-csharp/EdgeGeneration.cs#L7-L8): `MinWeight = 1` and `MaxWeight = 100`. In Rust this range is hard-coded in `edge.rs` (with a matching `101` in `tree.rs`).
 

@@ -165,6 +165,7 @@ procgen-csharp/
     ├── Spawnable.cs            Spawnable records (enemy, health, ammo, buff)
     ├── Population.cs           room kinds, spawning, population validation
     ├── GenerationStats.cs      time per step + generation attempts ("stats" in the JSON)
+    ├── GeneratedDungeon.cs     everything one generated dungeon needs for the JSON
     └── DungeonJson.cs          Build: the dungeon as JSON (format version 2)
 ```
 

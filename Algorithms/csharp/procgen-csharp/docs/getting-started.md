@@ -59,13 +59,13 @@ Everything below is printed to **stderr**, in order:
 | 1 | `Generated 18 rooms in 35 attempts` (once per generation attempt) | [`RoomGeneration.cs` L28](../procgen-csharp/RoomGeneration.cs#L28) |
 | 2 | the reason, if a room set fails validation | [`Validation.cs`](../procgen-csharp/Validation.cs) |
 | 3 | `Valid rooms after N generation attempts` | [`Program.cs` L98](../procgen-csharp/Program.cs#L98) |
-| 4 | every room: id, position, size | [`Program.cs` L99–102](../procgen-csharp/Program.cs#L99-L102), [`Room.ToString`](../procgen-csharp/Room.cs#L26-L29) |
-| 5 | `Generated 153 edges`, then every edge with its weight | [`Program.cs` L109–115](../procgen-csharp/Program.cs#L109-L115), [`Edge.ToString`](../procgen-csharp/Edge.cs#L11-L14) |
-| 6 | `Backbone has 17 edges`, then every tree edge | [`Program.cs` L122–128](../procgen-csharp/Program.cs#L122-L128) |
-| 7 | every door with its walls, e.g. `Door 0-15: bottom/top` | [`Program.cs` L135–140](../procgen-csharp/Program.cs#L135-L140), [`Door.ToString`](../procgen-csharp/Door.cs#L21-L24) |
-| 8 | `Start room 0, end room 6 (12 doors away)` | [`Program.cs` L151](../procgen-csharp/Program.cs#L151) |
-| 9 | the kind of every room, e.g. `Room 3 is Enemy` | [`Program.cs` L158–164](../procgen-csharp/Program.cs#L158-L164) |
-| 10 | the reason, if population validation fails (then exit 1) | [`Population.ValidatePopulation`](../procgen-csharp/Population.cs#L133-L175) |
+| 4 | every room: id, position, size | [`Program.cs` L98](../procgen-csharp/Program.cs#L98), [`Room.ToString`](../procgen-csharp/Room.cs#L26-L29) |
+| 5 | `Generated 153 edges`, then every edge with its weight | [`Program.cs` L105–108](../procgen-csharp/Program.cs#L105-L108), [`Edge.ToString`](../procgen-csharp/Edge.cs#L11-L14) |
+| 6 | `Backbone has 17 edges`, then every tree edge | [`Program.cs` L114–117](../procgen-csharp/Program.cs#L114-L117) |
+| 7 | every door with its walls, e.g. `Door 0-15: bottom/top` | [`Program.cs` L123–126](../procgen-csharp/Program.cs#L123-L126), [`Door.ToString`](../procgen-csharp/Door.cs#L21-L24) |
+| 8 | `Start room 0, end room 6 (12 doors away)` | [`Program.cs` L136](../procgen-csharp/Program.cs#L136) |
+| 9 | the kind of every room, e.g. `Room 3 is Enemy` | [`Program.cs` L143–146](../procgen-csharp/Program.cs#L143-L146) |
+| 10 | the reason, if population validation fails (then exit 1) | [`Population.ValidatePopulation`](../procgen-csharp/Population.cs#L138-L180) |
 
 On **stdout** comes only the dungeon JSON. To see just the JSON, or just the logs:
 

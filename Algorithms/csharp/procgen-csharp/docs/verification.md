@@ -118,7 +118,7 @@ For seeds 0–999 both generators were run and compared on: exit code, the compl
 Two paths that don't run for every seed, checked separately with a temporary copy of the C# code that logs them:
 
 - the item-room fallback (no room rolled `Item`): used in **164 of the 1000 seeds**, all identical to Rust,
-- population validation failing: **0 of 1000** in both languages (see [Population → Step 4](population.md#step-4-validation--validatepopulation-l133175)), so the exit-1 path is identical in code but couldn't be compared on real output.
+- population validation failing: **0 of 1000** in both languages (see [Population → Step 4](population.md#step-4-validation--validatepopulation-l138180)), so the exit-1 path is identical in code but couldn't be compared on real output.
 
 The game test (check 10) was repeated with the new exe: **13/13 passed**, and the spawnable counts now match too (seed 42: 26 in both).
 

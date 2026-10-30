@@ -63,7 +63,7 @@ public static class DungeonJson
     }
 
     // The classes below only describe the JSON shape. Properties are written in declaration order.
-    private class DungeonDto
+    private sealed class DungeonDto
     {
         [JsonPropertyName("format_version")] public int FormatVersion { get; init; }
         [JsonPropertyName("seed")] public ulong Seed { get; init; }
@@ -78,7 +78,7 @@ public static class DungeonJson
     }
 
     // Fields that don't belong to a kind stay null and are left out of the JSON.
-    private class SpawnableDto
+    private sealed class SpawnableDto
     {
         [JsonPropertyName("type")] public string Type { get; init; } = "";
         [JsonPropertyName("x")] public int X { get; init; }
@@ -89,7 +89,7 @@ public static class DungeonJson
         [JsonPropertyName("buff"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Buff { get; init; }
     }
 
-    private class RoomDto
+    private sealed class RoomDto
     {
         [JsonPropertyName("width")] public int Width { get; init; }
         [JsonPropertyName("height")] public int Height { get; init; }
@@ -98,7 +98,7 @@ public static class DungeonJson
         [JsonPropertyName("id")] public int Id { get; init; }
     }
 
-    private class DoorDto
+    private sealed class DoorDto
     {
         [JsonPropertyName("from")] public int From { get; init; }
         [JsonPropertyName("to")] public int To { get; init; }
