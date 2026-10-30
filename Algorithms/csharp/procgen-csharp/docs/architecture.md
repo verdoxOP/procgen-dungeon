@@ -65,18 +65,18 @@ Same as Rust: rooms → validate → edges → Prim backbone → doors → BFS e
 | Step | Call | Produces | Code |
 |---|---|---|---|
 | 1 | `TryParseArgs`: `--seed`, optional `--runs` / `--warmup` | `seed`, `runs`, `warmup`, or exit 2 | [L9–13](../procgen-csharp/Program.cs#L9-L13), [L32–66](../procgen-csharp/Program.cs#L32-L66) |
-| — | `--runs` given: `RunBenchmark` instead of steps 2–12, see [Getting started → Benchmark mode](getting-started.md#benchmark-mode) | one stats line per dungeon | [L15–19](../procgen-csharp/Program.cs#L15-L19), [L192–210](../procgen-csharp/Program.cs#L192-L210) |
+| — | `--runs` given: `RunBenchmark` instead of steps 2–12, see [Getting started → Benchmark mode](getting-started.md#benchmark-mode) | one stats line per dungeon | [L15–19](../procgen-csharp/Program.cs#L15-L19), [L189–207](../procgen-csharp/Program.cs#L189-L207) |
 | 2 | `Pcg32.FromSeed(seed)` | `rng: Pcg32` | [L75](../procgen-csharp/Program.cs#L75) |
 | 3 | `GenerateRooms` in a retry loop with `ValidateRooms` | `rooms: List<Room>` | [L77–88](../procgen-csharp/Program.cs#L77-L88) |
 | 4 | still invalid after all attempts | exit 1 | [L90–94](../procgen-csharp/Program.cs#L90-L94) |
-| 5 | print rooms | stderr | [L96–103](../procgen-csharp/Program.cs#L96-L103) |
-| 6 | `EdgeGeneration.GenerateEdges(rng, rooms)` | `edges: List<Edge>` (complete graph) | [L105–116](../procgen-csharp/Program.cs#L105-L116) |
-| 7 | `SpanningTree.BuildTree(edges, rooms.Count)` | `tree: List<Edge>` (n − 1 edges) | [L118–129](../procgen-csharp/Program.cs#L118-L129) |
-| 8 | `DoorGeneration.GenerateDoors(tree, rooms)` | `doors: List<Door>` (one per tree edge) | [L131–141](../procgen-csharp/Program.cs#L131-L141) |
-| 9 | `Bfs.RoomDistances` + `Bfs.FurthestRoom` | `startRoom = 0`, `endRoom` | [L143–152](../procgen-csharp/Program.cs#L143-L152) |
-| 10 | `Population.PopulateDungeon(rng, rooms, doors, start, end)` | room kinds, `spawnables` | [L154–164](../procgen-csharp/Program.cs#L154-L164) |
-| 11 | `Population.ValidatePopulation(...)` | exit 1 if invalid | [L166–174](../procgen-csharp/Program.cs#L166-L174) |
-| 12 | `new GenerationStats { ... }`, then `DungeonJson.Build(...)` | JSON with `stats` on stdout | [L176–186](../procgen-csharp/Program.cs#L176-L186), [L28](../procgen-csharp/Program.cs#L28) |
+| 5 | print rooms | stderr | [L96–99](../procgen-csharp/Program.cs#L96-L99) |
+| 6 | `EdgeGeneration.GenerateEdges(rng, rooms)` | `edges: List<Edge>` (complete graph) | [L101–108](../procgen-csharp/Program.cs#L101-L108) |
+| 7 | `SpanningTree.BuildTree(edges, rooms.Count)` | `tree: List<Edge>` (n − 1 edges) | [L110–117](../procgen-csharp/Program.cs#L110-L117) |
+| 8 | `DoorGeneration.GenerateDoors(tree, rooms)` | `doors: List<Door>` (one per tree edge) | [L119–126](../procgen-csharp/Program.cs#L119-L126) |
+| 9 | `Bfs.RoomDistances` + `Bfs.FurthestRoom` | `startRoom = 0`, `endRoom` | [L128–137](../procgen-csharp/Program.cs#L128-L137) |
+| 10 | `Population.PopulateDungeon(rng, rooms, doors, start, end)` | room kinds, `spawnables` | [L139–146](../procgen-csharp/Program.cs#L139-L146) |
+| 11 | `Population.ValidatePopulation(...)` | exit 1 if invalid | [L148–156](../procgen-csharp/Program.cs#L148-L156) |
+| 12 | `new GenerationStats { ... }`, then `DungeonJson.Build(...)` | JSON with `stats` on stdout | [L158–168](../procgen-csharp/Program.cs#L158-L168), [L28](../procgen-csharp/Program.cs#L28) |
 
 Steps 2–11 live in `GenerateDungeon(seed, log)` ([L73](../procgen-csharp/Program.cs#L73)), so the benchmark can run the exact same pipeline many times in one process. It returns `null` where the old code exited with 1. With `log: false` the logging between the steps is skipped.
 
@@ -97,6 +97,7 @@ The same `rng` object is passed to every random step. C# classes are reference t
 | [`Wall`, `Door`](../procgen-csharp/Door.cs) | door data type | `RoomA`, `RoomB`, `WallA`, `WallB` | `Wall`, `Door` in `door.rs` |
 | [`DoorGeneration`](../procgen-csharp/DoorGeneration.cs) | wall per door | `GenerateDoors`, `EdgeToDoor`, `OppositeWall` | `generate_doors`, `edge_to_door`, `opposite_wall` in `door.rs` |
 | [`Bfs`](../procgen-csharp/Bfs.cs) | end room | `RoomDistances`, `FurthestRoom` | `room_distances`, `furthest_room` in `bfs.rs` |
+| [`GeneratedDungeon`](../procgen-csharp/GeneratedDungeon.cs) | result of `GenerateDungeon`: rooms, doors, spawnables, start/end room, stats | record properties | `GeneratedDungeon` struct in `main.rs` |
 | [`Spawnable` records](../procgen-csharp/Spawnable.cs) | spawnable data types | `X`, `Y`, `IsHostile` + fields per kind | `Spawnable` enum in `population.rs` |
 | [`Population`](../procgen-csharp/Population.cs) | room kinds, spawning, validation | `PopulateDungeon`, `ChooseRoomKinds`, `EnemyCount`, `DoorTile`, `ValidatePopulation` | `population.rs` |
 | [`DungeonJson`](../procgen-csharp/DungeonJson.cs) | JSON output | `Build`, `GeneratorName` | `build_dungeon_json` in `dungeon_json.rs` |

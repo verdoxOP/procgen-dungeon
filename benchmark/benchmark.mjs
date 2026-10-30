@@ -89,14 +89,19 @@ function describe(values) {
   const at = (q) => sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))];
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
   const sd = Math.sqrt(values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length);
-  return { mean, median: at(0.5), p95: at(0.95), min: sorted[0], max: sorted[sorted.length - 1], sd };
+  return { mean, median: at(0.5), p95: at(0.95), min: sorted[0], max: sorted.at(-1), sd };
 }
 
 function toCsv(rows, columns) {
   return [columns.join(","), ...rows.map((r) => columns.map((c) => r[c]).join(","))].join("\n") + "\n";
 }
 
-const fmt = (x) => (x >= 100 ? x.toFixed(1) : x >= 1 ? x.toFixed(3) : x.toFixed(4));
+// Fewer decimals for bigger numbers, so every value shows about 4 significant digits.
+function fmt(x) {
+  if (x >= 100) return x.toFixed(1);
+  if (x >= 1) return x.toFixed(3);
+  return x.toFixed(4);
+}
 
 // One table per measurement: every metric, both generators, and how many times slower C# is (median).
 function table(rows, metrics) {

@@ -66,6 +66,16 @@ The latest run is in [results/summary.md](results/summary.md). Medians for seeds
 
 Cold, C# loses mostly to JIT compilation and .NET start-up. Warm, the gap is much smaller. C# is even faster at rooms and BFS, and slower mainly in population.
 
+## Code size
+
+```sh
+node benchmark/code-size.mjs
+```
+
+Counts the lines of code per pipeline step in both generators, tests separately, and lists dependencies and program size. Writes [results/code-size.md](results/code-size.md). Compare the **logic** column (code lines without lines that are only brackets): C# puts `{` on its own line and Rust doesn't.
+
+Both generators were written by a different person, so code size also reflects personal style, not only the language.
+
 ## Limitations
 
 - The fastest steps take a few hundred nanoseconds. That is close to the resolution of the timers (about 100 ns on Windows), so `doors_ms` and `edges_ms` on their own say little. `total_ms` is more reliable.

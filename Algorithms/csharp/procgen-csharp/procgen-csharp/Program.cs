@@ -95,11 +95,7 @@ static GeneratedDungeon? GenerateDungeon(ulong seed, bool log)
 
     if (log)
     {
-        Console.Error.WriteLine($"Valid rooms after {roomAttempts} generation attempts");
-        foreach (Room room in rooms)
-        {
-            Console.Error.WriteLine(room);
-        }
+        LogLines($"Valid rooms after {roomAttempts} generation attempts", rooms);
     }
 
     // Edges: every pair of rooms is a candidate door, with a random weight.
@@ -108,11 +104,7 @@ static GeneratedDungeon? GenerateDungeon(ulong seed, bool log)
     double edgesMs = GenerationStats.ElapsedMs(edgesStart);
     if (log)
     {
-        Console.Error.WriteLine($"Generated {edges.Count} edges");
-        foreach (Edge edge in edges)
-        {
-            Console.Error.WriteLine(edge);
-        }
+        LogLines($"Generated {edges.Count} edges", edges);
     }
 
     // Backbone: Prim's spanning tree over the edges. These edges become the doors.
@@ -121,11 +113,7 @@ static GeneratedDungeon? GenerateDungeon(ulong seed, bool log)
     double treeMs = GenerationStats.ElapsedMs(treeStart);
     if (log)
     {
-        Console.Error.WriteLine($"Backbone has {tree.Count} edges");
-        foreach (Edge edge in tree)
-        {
-            Console.Error.WriteLine($"Tree {edge}");
-        }
+        LogLines($"Backbone has {tree.Count} edges", tree.Select(edge => $"Tree {edge}"));
     }
 
     // Doors: every backbone edge becomes a door, in a wall that faces the other room.
@@ -134,10 +122,7 @@ static GeneratedDungeon? GenerateDungeon(ulong seed, bool log)
     double doorsMs = GenerationStats.ElapsedMs(doorsStart);
     if (log)
     {
-        foreach (Door door in doors)
-        {
-            Console.Error.WriteLine(door);
-        }
+        LogLines(null, doors);
     }
 
     // Start and end room: the start is room 0, the end is the room the most doors away (BFS).
@@ -157,10 +142,7 @@ static GeneratedDungeon? GenerateDungeon(ulong seed, bool log)
     double populationMs = GenerationStats.ElapsedMs(populationStart);
     if (log)
     {
-        for (int room = 0; room < roomKinds.Count; room++)
-        {
-            Console.Error.WriteLine($"Room {room} is {roomKinds[room]}");
-        }
+        LogLines(null, roomKinds.Select((kind, room) => $"Room {room} is {kind}"));
     }
 
     long validateStart = Stopwatch.GetTimestamp();
@@ -186,6 +168,21 @@ static GeneratedDungeon? GenerateDungeon(ulong seed, bool log)
     return new GeneratedDungeon(rooms, doors, spawnables, startRoom, endRoom, stats);
 }
 
+// The logging between the steps: an optional header line, then one line per item, to stderr.
+// Kept out of GenerateDungeon, so that function only shows the steps and their timing.
+static void LogLines<T>(string? header, IEnumerable<T> items)
+{
+    if (header != null)
+    {
+        Console.Error.WriteLine(header);
+    }
+
+    foreach (T item in items)
+    {
+        Console.Error.WriteLine(item);
+    }
+}
+
 // Benchmark: generates the seeds firstSeed..firstSeed+runs in one process and prints one line with the
 // stats per dungeon. Warmup generates the same seeds that many times first without printing, so the
 // measured runs don't include one-time costs (for C# that is the JIT compiling every method the first time).
@@ -208,12 +205,3 @@ static void RunBenchmark(ulong firstSeed, ulong runs, ulong warmup)
             : JsonSerializer.Serialize(new { seed = runSeed, failed = true }));
     }
 }
-
-// Everything one generated dungeon needs for the JSON.
-internal record GeneratedDungeon(
-    List<Room> Rooms,
-    List<Door> Doors,
-    List<Spawnable> Spawnables,
-    int StartRoom,
-    int EndRoom,
-    GenerationStats Stats);
