@@ -9,7 +9,7 @@ Every room is its own screen. Walking into a door loads the room on the other si
 | `format_version` | int | `2` |
 | `seed` | int | seed used to generate this dungeon |
 | `generator` | string | e.g. `"rust"` |
-| `stats` | object | optional, ignored by Godot (timings / attempts per stage for the report) |
+| `stats` | object | optional, for the report. `rooms_ms`, `edges_ms`, `tree_ms`, `doors_ms`, `bfs_ms`, `population_ms`: time per step in milliseconds (float). `total_ms`: the sum of those steps, without logging or process start-up. `generation_attempts`: how many times the rooms were generated before they were valid. Godot only shows `total_ms` in the HUD. |
 | `rooms` | array | `{ id, x, y, width, height }` in tiles. `x, y` = top-left floor tile. The rectangle is **floor only**; Godot puts a 1-tile wall ring around it. Rooms may touch, they just can't overlap. |
 | `start_room` | int | room id the player spawns in (centre of the room) |
 | `end_room` | int | room id with the exit (centre of the room) |

@@ -16,13 +16,14 @@ public static class DungeonJson
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
     };
 
-    public static string Build(ulong seed, List<Room> rooms, List<Door> doors, List<Spawnable> spawnables, int startRoom, int endRoom)
+    public static string Build(ulong seed, List<Room> rooms, List<Door> doors, List<Spawnable> spawnables, int startRoom, int endRoom, GenerationStats stats)
     {
         var dungeon = new DungeonDto
         {
             FormatVersion = Constants.FormatVersion,
             Seed = seed,
             Generator = GeneratorName,
+            Stats = stats,
             Rooms = rooms.Select(r => new RoomDto
             {
                 Width = r.Width,
@@ -67,6 +68,7 @@ public static class DungeonJson
         [JsonPropertyName("format_version")] public int FormatVersion { get; init; }
         [JsonPropertyName("seed")] public ulong Seed { get; init; }
         [JsonPropertyName("generator")] public string Generator { get; init; } = "";
+        [JsonPropertyName("stats")] public GenerationStats Stats { get; init; } = new();
         [JsonPropertyName("rooms")] public List<RoomDto> Rooms { get; init; } = new();
         [JsonPropertyName("start_room")] public int StartRoom { get; init; }
         [JsonPropertyName("end_room")] public int EndRoom { get; init; }

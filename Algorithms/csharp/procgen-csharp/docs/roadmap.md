@@ -18,7 +18,7 @@ Port order follows the Rust generator (see [Architecture → Porting approach](a
 | JSON export to stdout | ✅ done | [`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs) | ✅ seeds 0–299 |
 | BFS: end room | ✅ done | [`Bfs.cs`](../procgen-csharp/Bfs.cs) | ✅ seeds 0–299 |
 | Population + population validation | ✅ done | [`Population.cs`](../procgen-csharp/Population.cs) | ✅ seeds 0–999, byte-identical JSON |
-| `stats` (time and attempts per stage) | ⏳ next (not in Rust yet either) | | |
+| `stats` (time per step and attempts) | ✅ done, added to both generators at the same time | [`GenerationStats.cs`](../procgen-csharp/GenerationStats.cs) | ✅ seeds 0–999: same keys, same attempts, same dungeon |
 | Corridors | ❌ cut from scope (also in Rust, `e3dc311`) | | |
 | Locked doors and keys | ⏳ only if Rust adds them | | |
 | Unit tests | ✅ done: Matt's 26 Rust tests translated one to one, all pass | [`procgen-csharp.Tests`](../procgen-csharp.Tests), [Test plan](test-plan.md), [Test report](test-report.md) | same tests as Rust |

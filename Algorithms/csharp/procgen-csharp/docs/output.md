@@ -10,8 +10,8 @@ Rooms don't know their own role; the dungeon does (see [Rust → Design decision
 
 | Role | Rule | Code |
 |---|---|---|
-| start room | always room `0` | [`Program.cs` L61](../procgen-csharp/Program.cs#L61) |
-| end room | the room the **most doors away** from the start | [`Program.cs` L62–63](../procgen-csharp/Program.cs#L62-L63) |
+| start room | always room `0` | [`Program.cs` L144](../procgen-csharp/Program.cs#L144) |
+| end room | the room the **most doors away** from the start | [`Program.cs` L146–147](../procgen-csharp/Program.cs#L146-L147) |
 
 "Most doors away" means the player has to cross the most rooms to reach the exit. Since the backbone is a tree, there is exactly one route, so this distance is fixed.
 
@@ -35,13 +35,14 @@ Neither function draws random numbers.
 
 ## JSON output ([`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs))
 
-`DungeonJson.Build(...)` ([L19–49](../procgen-csharp/DungeonJson.cs#L19-L49)) turns the dungeon into the JSON the game reads: `format_version` 2, described in the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md). `Program` prints it to **stdout** ([L80](../procgen-csharp/Program.cs#L80)); that is the only thing on stdout.
+`DungeonJson.Build(...)` ([L19–50](../procgen-csharp/DungeonJson.cs#L19-L50)) turns the dungeon into the JSON the game reads: `format_version` 2, described in the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md). `Program` prints it to **stdout** ([L28](../procgen-csharp/Program.cs#L28)); that is the only thing on stdout.
 
 | Key | Value | Source |
 |---|---|---|
 | `format_version` | `2` | `Constants.FormatVersion` |
 | `seed` | the seed from the command line | `--seed` |
 | `generator` | `"csharp"` | [`GeneratorName`](../procgen-csharp/DungeonJson.cs#L10) (Rust: `"rust"`) |
+| `stats` | time per step and generation attempts | [`GenerationStats`](../procgen-csharp/GenerationStats.cs), see below |
 | `rooms` | `width`, `height`, `x`, `y`, `id` per room | `RoomGeneration` |
 | `start_room` | `0` | |
 | `end_room` | furthest room | `Bfs` |
@@ -51,7 +52,7 @@ Neither function draws random numbers.
 
 ### Same shape as Rust
 
-The keys are written **in the same order** as Rust's `serde_json`: the small classes at the bottom of the file ([`DungeonDto`, `SpawnableDto`, `RoomDto`, `DoorDto`, L65–105](../procgen-csharp/DungeonJson.cs#L65-L105)) list their properties in that order, and `System.Text.Json` writes them in declaration order. `[JsonPropertyName]` gives the exact snake_case keys, and a `JsonStringEnumConverter` with camelCase naming writes the `Wall` enum as `"top"`, `"bottom"`, `"left"`, `"right"` ([L12–17](../procgen-csharp/DungeonJson.cs#L12-L17)). Both use 2-space indentation.
+The keys are written **in the same order** as Rust's `serde_json`: the small classes at the bottom of the file ([`DungeonDto`, `SpawnableDto`, `RoomDto`, `DoorDto`, L66–107](../procgen-csharp/DungeonJson.cs#L66-L107)) list their properties in that order, and `System.Text.Json` writes them in declaration order. `[JsonPropertyName]` gives the exact snake_case keys, and a `JsonStringEnumConverter` with camelCase naming writes the `Wall` enum as `"top"`, `"bottom"`, `"left"`, `"right"` ([L12–17](../procgen-csharp/DungeonJson.cs#L12-L17)). Both use 2-space indentation.
 
 The game reads the JSON by key, so the order doesn't matter to it, but it means the C# and Rust output can be compared as text: for every seed tested (0–999) they are byte-for-byte identical apart from the `generator` name. Spawnables leave out the fields of other kinds (`JsonIgnore` when null), like serde's tagged enum.
 
@@ -59,7 +60,39 @@ The internal classes (`Room`, `Door`) stay free of JSON attributes; only the DTO
 
 ### Corridors cut from scope
 
-Matt cut corridors from the project because of the deadline (commit `e3dc311`, see [Rust → Design decisions → Corridors](../../../rust/procgen_dungeon/docs/design-decisions.md#corridors)). `corridors` is always an empty array in both generators ([L44](../procgen-csharp/DungeonJson.cs#L44)). The game still supports corridors, so a test file with corridors keeps working.
+Matt cut corridors from the project because of the deadline (commit `e3dc311`, see [Rust → Design decisions → Corridors](../../../rust/procgen_dungeon/docs/design-decisions.md#corridors)). `corridors` is always an empty array in both generators ([L45](../procgen-csharp/DungeonJson.cs#L45)). The game still supports corridors, so a test file with corridors keeps working.
+
+## Stats: time per step
+
+`stats` is there for the comparison between the languages. Matt and I added it to both generators at the same time, with the same keys in the same order ([`GenerationStats.cs`](../procgen-csharp/GenerationStats.cs), Rust: `Stats` in `dungeon_json.rs`):
+
+| Key | What is timed |
+|---|---|
+| `rooms_ms` | `GenerateRooms` + `ValidateRooms`, including every retry |
+| `edges_ms` | `GenerateEdges` |
+| `tree_ms` | `BuildTree` |
+| `doors_ms` | `GenerateDoors` |
+| `bfs_ms` | `RoomDistances` + `FurthestRoom` |
+| `population_ms` | `PopulateDungeon` + `ValidatePopulation` |
+| `total_ms` | the sum of the six steps above |
+| `generation_attempts` | how many times the rooms were generated (same number in both languages) |
+
+How it is measured:
+
+- `Stopwatch.GetTimestamp()` before a step, `Stopwatch.GetElapsedTime(start).TotalMilliseconds` after it, as a `double` so a fast step doesn't round down to 0. Rust uses `Instant::now()` and `elapsed().as_secs_f64() * 1000.0`.
+- Only the step itself is timed. The logging `Program` does between the steps (every room, edge and door to stderr) is **not** part of the time, because logging speed differs per language and isn't the algorithm. `total_ms` is the sum of the steps for the same reason, not one timer around everything.
+- The few log lines *inside* the steps (`Generated 18 rooms in 35 attempts`, validation messages) are timed, in both languages.
+- Process start-up and building the JSON are not timed. The game measures the whole process separately ("process ms").
+
+Results of the benchmark (`benchmark/` in the repository root, seeds 0–999, medians):
+
+| | Rust | C# | C# / Rust |
+|---|---|---|---|
+| cold `total_ms`: one dungeon per process, like the game | 0.070 ms | 9.5 ms | 136× |
+| cold `process_ms`: the whole process | 12.3 ms | 110 ms | 8.9× |
+| warm `total_ms`: one process, after 3 warmup passes | 0.024 ms | 0.069 ms | 2.9× |
+
+Cold, most of the C# time is JIT compilation: every method is compiled the first time it is called, and in a new process that happens inside the timed steps. Warm, that is gone and the algorithms themselves are compared: C# is faster at rooms and BFS, and slower mainly in population (4.3×). See [Design decisions → Target framework](design-decisions.md#target-framework) and the full tables in `benchmark/results/summary.md`.
 
 ## Running in the game
 

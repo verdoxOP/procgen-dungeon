@@ -9,7 +9,7 @@ All tunable values are in [`Constants.cs`](../procgen-csharp/Constants.cs). They
 | [`MinRoomCount`](../procgen-csharp/Constants.cs#L6) | 8 | [`GenerateRooms`](../procgen-csharp/RoomGeneration.cs#L9), [`ValidateRooms`](../procgen-csharp/Validation.cs#L9) | lowest target room count, and the minimum for a valid dungeon | `min_room_count` |
 | [`MaxRoomCount`](../procgen-csharp/Constants.cs#L7) | 20 | [`GenerateRooms`](../procgen-csharp/RoomGeneration.cs#L9) | highest target room count | `max_room_count` |
 | [`MaxPlacementAttempts`](../procgen-csharp/Constants.cs#L9) | 1000 | [`GenerateRooms`](../procgen-csharp/RoomGeneration.cs#L13) | room placement attempts per generation | `max_attempts` |
-| [`MaxGenerationAttempts`](../procgen-csharp/Constants.cs#L11) | 10 | [`Program`](../procgen-csharp/Program.cs#L18) | full regenerations before giving up | `MAX_GENERATION_ATTEMPTS` |
+| [`MaxGenerationAttempts`](../procgen-csharp/Constants.cs#L11) | 10 | [`Program`](../procgen-csharp/Program.cs#L82) | full regenerations before giving up | `MAX_GENERATION_ATTEMPTS` |
 | [`MinRoomWidth`](../procgen-csharp/Constants.cs#L13) | 8 | [`GenerateRoom`](../procgen-csharp/RoomGeneration.cs#L34), [`ValidateRooms`](../procgen-csharp/Validation.cs#L17) | minimum room width | `MIN_ROOM_WIDTH` |
 | [`MinRoomHeight`](../procgen-csharp/Constants.cs#L14) | 8 | [`GenerateRoom`](../procgen-csharp/RoomGeneration.cs#L35), [`ValidateRooms`](../procgen-csharp/Validation.cs#L17) | minimum room height | `MIN_ROOM_HEIGHT` |
 | [`MaxRoomWidth`](../procgen-csharp/Constants.cs#L15) | 20 | [`GenerateRoom`](../procgen-csharp/RoomGeneration.cs#L34) | maximum room width | `MAX_ROOM_WIDTH` |

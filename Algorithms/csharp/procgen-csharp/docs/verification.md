@@ -126,6 +126,12 @@ The game test (check 10) was repeated with the new exe: **13/13 passed**, and th
 
 Not a comparison, but found while porting: placing the doors the way the game does and checking every Rust spawnable for seeds 0–999 gives **304 spawnables (265 enemies) on or next to the tile where the player enters a room, in 260 seeds**. See [Population → Known issue](population.md#known-issue-spawns-next-to-doors).
 
+### 13. Stats in both generators
+
+After adding `stats` to both generators, seeds 0–999 were run again with both exes from `build-generators.ps1`, checking: the top-level keys and their order, the `stats` keys and their order, `total_ms` equal to the sum of the six steps, `generation_attempts` equal in both languages, and the rest of the dungeon identical (ignoring `generator` and `stats`).
+
+**Result: 0 problems in 1000 seeds.** `cargo test` (26) and `dotnet test` (26) still pass.
+
 ## How to repeat a check
 
 For one seed, by hand:
@@ -148,4 +154,3 @@ Then compare `rust.json` and `csharp.json`: apart from `"generator"` they should
 ## Still to do
 
 - Turn these checks into unit tests (see [Roadmap](roadmap.md#test-ideas)).
-- Repeat the comparison for every new step: `stats` (timings will differ, the attempts must not).

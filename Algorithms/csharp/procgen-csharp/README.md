@@ -26,9 +26,9 @@ C# generator → validated dungeon data → JSON → Godot
 | Stage | Status | Code |
 |---|---|---|
 | Seeded, deterministic RNG (port of Rust's `Pcg32`) | ✅ done, identical to Rust | [`Pcg32.cs`](procgen-csharp/Pcg32.cs) |
-| Command line (`--seed`, exit codes) | ✅ done | [`Program.cs` L6–12](procgen-csharp/Program.cs#L6-L12) |
+| Command line (`--seed`, exit codes) | ✅ done | [`Program.cs` L9–19](procgen-csharp/Program.cs#L9-L19) |
 | Room generation (random size and position, no overlap) | ✅ done, identical to Rust | [`RoomGeneration.cs`](procgen-csharp/RoomGeneration.cs) |
-| Room validation + retry loop | ✅ done, identical to Rust | [`Validation.cs`](procgen-csharp/Validation.cs), [`Program.cs` L14–29](procgen-csharp/Program.cs#L14-L29) |
+| Room validation + retry loop | ✅ done, identical to Rust | [`Validation.cs`](procgen-csharp/Validation.cs), [`Program.cs` L77–94](procgen-csharp/Program.cs#L77-L94) |
 | Candidate edges (complete graph, random weights) | ✅ done, identical to Rust | [`EdgeGeneration.cs`](procgen-csharp/EdgeGeneration.cs) |
 | Backbone with Prim's algorithm | ✅ done, identical to Rust | [`SpanningTree.cs`](procgen-csharp/SpanningTree.cs) |
 | Doors (wall per connection) | ✅ done, identical to Rust | [`DoorGeneration.cs`](procgen-csharp/DoorGeneration.cs) |
@@ -36,7 +36,7 @@ C# generator → validated dungeon data → JSON → Godot
 | JSON export to stdout | ✅ done, identical to Rust | [`DungeonJson.cs`](procgen-csharp/DungeonJson.cs) |
 | Runs in the Godot game | ✅ done | see [Output](docs/output.md#running-in-the-game) |
 | Population + population validation | ✅ done, identical to Rust | [`Population.cs`](procgen-csharp/Population.cs) |
-| `stats` (time and attempts per stage) | ⏳ next (not in Rust yet either) | |
+| `stats` (time per step and attempts) | ✅ done, same keys as Rust | [`GenerationStats.cs`](procgen-csharp/GenerationStats.cs), see [Output](docs/output.md#stats-time-per-step) |
 | Corridors | ❌ cut from scope (also in Rust) | |
 | Unit tests (same 26 tests as Rust) | ✅ done, all pass | [`procgen-csharp.Tests`](procgen-csharp.Tests), see [Test plan](docs/test-plan.md) |
 
@@ -60,6 +60,14 @@ The seed is a command-line argument, following the contract the Godot game uses 
 | 0 | success |
 | 1 | generation failed (no valid rooms after `MaxGenerationAttempts`) |
 | 2 | invalid arguments |
+
+### Benchmark mode
+
+```sh
+dotnet run -c Release -- --seed 0 --runs 1000 --warmup 3
+```
+
+Generates many dungeons in one process and prints only their `stats`, one line each. Same options as the Rust generator; used by `benchmark/benchmark.mjs`. See [Getting started → Benchmark mode](docs/getting-started.md#benchmark-mode).
 
 ### Unit tests
 
@@ -156,6 +164,7 @@ procgen-csharp/
     ├── Bfs.cs                  RoomDistances / FurthestRoom (end room)
     ├── Spawnable.cs            Spawnable records (enemy, health, ammo, buff)
     ├── Population.cs           room kinds, spawning, population validation
+    ├── GenerationStats.cs      time per step + generation attempts ("stats" in the JSON)
     └── DungeonJson.cs          Build: the dungeon as JSON (format version 2)
 ```
 

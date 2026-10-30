@@ -44,7 +44,7 @@ Connects **every pair of rooms**, so the result is a **complete graph**:
 
 **The order is fixed:** pairs are visited as `(0,1), (0,2), …, (0,n−1), (1,2), …`, exactly like `edge.rs`, and each pair draws one random number. A different loop order would assign the same weights to different pairs, and Prim would build a different tree than Rust.
 
-Edges are generated right after the rooms are valid ([`Program.cs` L38](../procgen-csharp/Program.cs#L38)), with the same `rng`, so the weights continue the same random sequence as in Rust.
+Edges are generated right after the rooms are valid ([`Program.cs` L107](../procgen-csharp/Program.cs#L107)), with the same `rng`, so the weights continue the same random sequence as in Rust.
 
 ### Why every pair, and why random weights
 

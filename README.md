@@ -49,13 +49,23 @@ Open `Scenes/dungeon_preview.tscn` in Godot. The whole dungeon for one seed is d
 
 Start room is outlined green, the end room red. Yellow lines connect the two sides of each door. Passive enemies are drawn slightly faded. The text above the map shows the counts and how long the generator took.
 
+## Benchmark
+
+After building the generators:
+
+```sh
+node benchmark/benchmark.mjs
+```
+
+Needs [Node.js](https://nodejs.org) 18 or newer. Compares Rust and C# over seeds 0–999, cold (one process per dungeon, like the game) and warm (one process, after warmup). See [benchmark/README.md](benchmark/README.md).
+
 ## How the game talks to a generator
 
 The game runs `generators/<name> --seed <number>` and reads the dungeon JSON from stdout. Any program that follows this contract shows up in the menu under its file name:
 
 | Rule | |
 |---|---|
-| arguments | `--seed <int>` |
+| arguments | `--seed <int>` (the generators also accept `--runs <n> [--warmup <n>]` for the benchmark) |
 | stdout | only the dungeon JSON (format version 2) |
 | stderr | logs |
 | exit code | 0 = ok, 1 = generation failed, 2 = invalid arguments |
