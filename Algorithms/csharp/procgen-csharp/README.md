@@ -26,9 +26,9 @@ C# generator → validated dungeon data → JSON → Godot
 | Stage | Status | Code |
 |---|---|---|
 | Seeded, deterministic RNG (port of Rust's `Pcg32`) | ✅ done, identical to Rust | [`Pcg32.cs`](procgen-csharp/Pcg32.cs) |
-| Command line (`--seed`, exit codes) | ✅ done | [`Program.cs` L9–19](procgen-csharp/Program.cs#L9-L19) |
+| Command line (`--seed`, exit codes) | ✅ done | [`Program.cs` L8–18](procgen-csharp/Program.cs#L8-L18) |
 | Room generation (random size and position, no overlap) | ✅ done, identical to Rust | [`RoomGeneration.cs`](procgen-csharp/RoomGeneration.cs) |
-| Room validation + retry loop | ✅ done, identical to Rust | [`Validation.cs`](procgen-csharp/Validation.cs), [`Program.cs` L77–94](procgen-csharp/Program.cs#L77-L94) |
+| Room validation + retry loop | ✅ done, identical to Rust | [`Validation.cs`](procgen-csharp/Validation.cs), [`DungeonGenerator.cs` L16–33](procgen-csharp/DungeonGenerator.cs#L16-L33) |
 | Candidate edges (complete graph, random weights) | ✅ done, identical to Rust | [`EdgeGeneration.cs`](procgen-csharp/EdgeGeneration.cs) |
 | Backbone with Prim's algorithm | ✅ done, identical to Rust | [`SpanningTree.cs`](procgen-csharp/SpanningTree.cs) |
 | Doors (wall per connection) | ✅ done, identical to Rust | [`DoorGeneration.cs`](procgen-csharp/DoorGeneration.cs) |
@@ -150,7 +150,7 @@ procgen-csharp/
 ├── procgen-csharp.Tests/       xUnit tests, one class per Rust test module
 └── procgen-csharp/
     ├── procgen-csharp.csproj   console app, net8.0
-    ├── Program.cs              entry point: arguments, pipeline, exit codes
+    ├── Program.cs              entry point: arguments, exit codes, benchmark mode
     ├── Constants.cs            tunable generation parameters
     ├── Pcg32.cs                seeded RNG (port of Rust's Pcg32)
     ├── Room.cs                 Room + overlap check
@@ -165,6 +165,7 @@ procgen-csharp/
     ├── Spawnable.cs            Spawnable records (enemy, health, ammo, buff)
     ├── Population.cs           room kinds, spawning, population validation
     ├── GenerationStats.cs      time per step + generation attempts ("stats" in the JSON)
+    ├── DungeonGenerator.cs     Generate: the whole pipeline for one seed, timed per step
     ├── GeneratedDungeon.cs     everything one generated dungeon needs for the JSON
     └── DungeonJson.cs          Build: the dungeon as JSON (format version 2)
 ```
