@@ -10,8 +10,8 @@ Rooms don't know their own role; the dungeon does (see [Rust → Design decision
 
 | Role | Rule | Code |
 |---|---|---|
-| start room | always room `0` | [`Program.cs` L129](../procgen-csharp/Program.cs#L129) |
-| end room | the room the **most doors away** from the start | [`Program.cs` L131–132](../procgen-csharp/Program.cs#L131-L132) |
+| start room | always room `0` | [`DungeonGenerator.cs` L68](../procgen-csharp/DungeonGenerator.cs#L68) |
+| end room | the room the **most doors away** from the start | [`DungeonGenerator.cs` L70–71](../procgen-csharp/DungeonGenerator.cs#L70-L71) |
 
 "Most doors away" means the player has to cross the most rooms to reach the exit. Since the backbone is a tree, there is exactly one route, so this distance is fixed.
 
@@ -35,7 +35,7 @@ Neither function draws random numbers.
 
 ## JSON output ([`DungeonJson.cs`](../procgen-csharp/DungeonJson.cs))
 
-`DungeonJson.Build(...)` ([L19–50](../procgen-csharp/DungeonJson.cs#L19-L50)) turns the dungeon into the JSON the game reads: `format_version` 2, described in the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md). `Program` prints it to **stdout** ([L28](../procgen-csharp/Program.cs#L28)); that is the only thing on stdout.
+`DungeonJson.Build(...)` ([L19–50](../procgen-csharp/DungeonJson.cs#L19-L50)) turns the dungeon into the JSON the game reads: `format_version` 2, described in the game's [`FORMAT.md`](../../../../GoDot-Project/dungeon-crawler/test_data/FORMAT.md). `Program` prints it to **stdout** ([L27](../procgen-csharp/Program.cs#L27)); that is the only thing on stdout.
 
 | Key | Value | Source |
 |---|---|---|

@@ -19,11 +19,11 @@ Static program analysis of both generators, counted by `benchmark/code-size.mjs`
 | Population + validation | `population.rs` | 262 | 202 | `Spawnable.cs`, `Population.cs` | 234 | 138 | 0.68× |
 | JSON + stats | `dungeon_json.rs` | 53 | 49 | `DungeonJson.cs`, `GenerationStats.cs` | 109 | 83 | 1.69× |
 | Constants | `constants.rs` | 17 | 17 | `Constants.cs` | 20 | 18 | 1.06× |
-| Main (arguments, pipeline, benchmark mode) | `main.rs` | 209 | 171 | `Program.cs`, `GeneratedDungeon.cs` | 171 | 119 | 0.70× |
-| **Total** | | **765** | **618** | | **867** | **565** | **0.91×** |
-| Total without the RNG | | 765 | 618 | | 799 | 521 | 0.84× |
+| Main (arguments, pipeline, benchmark mode) | `main.rs` | 209 | 171 | `Program.cs`, `DungeonGenerator.cs`, `GeneratedDungeon.cs` | 175 | 121 | 0.71× |
+| **Total** | | **765** | **618** | | **871** | **567** | **0.92×** |
+| Total without the RNG | | 765 | 618 | | 803 | 523 | 0.85× |
 
-Comment lines: Rust 46, C# 100.
+Comment lines: Rust 46, C# 102.
 
 Not counted above: Rust's debug output (`grid.rs`, `tree_visualization.rs`, 73 code lines), which C# doesn't have.
 

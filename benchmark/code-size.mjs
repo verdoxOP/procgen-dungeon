@@ -31,7 +31,7 @@ const STEPS = [
   { step: "Population + validation", rust: ["population.rs"], csharp: ["Spawnable.cs", "Population.cs"] },
   { step: "JSON + stats", rust: ["dungeon_json.rs"], csharp: ["DungeonJson.cs", "GenerationStats.cs"] },
   { step: "Constants", rust: ["constants.rs"], csharp: ["Constants.cs"] },
-  { step: "Main (arguments, pipeline, benchmark mode)", rust: ["main.rs"], csharp: ["Program.cs", "GeneratedDungeon.cs"] },
+  { step: "Main (arguments, pipeline, benchmark mode)", rust: ["main.rs"], csharp: ["Program.cs", "DungeonGenerator.cs", "GeneratedDungeon.cs"] },
 ];
 // Only in Rust, for debugging; not part of the generator's output.
 const RUST_DEBUG = ["grid.rs", "tree_visualization.rs"];

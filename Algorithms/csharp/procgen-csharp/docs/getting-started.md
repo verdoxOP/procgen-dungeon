@@ -22,7 +22,7 @@ dotnet run -- --seed 42
 
 The `--` separates `dotnet run`'s own options from the program's arguments.
 
-The seed must be a whole number that fits in a `ulong` (0 to 18446744073709551615). Anything else prints a usage line and exits with code 2 ([`Program.cs` L9–13](../procgen-csharp/Program.cs#L9-L13)).
+The seed must be a whole number that fits in a `ulong` (0 to 18446744073709551615). Anything else prints a usage line and exits with code 2 ([`Program.cs` L8–12](../procgen-csharp/Program.cs#L8-L12)).
 
 To build a single exe for the game's `generators/` folder, see [Start, end and JSON output → Running in the game](output.md#running-in-the-game).
 
@@ -37,8 +37,8 @@ The generator follows the same contract as every generator the Godot game can ru
 | stdout | only the dungeon JSON (see [Start, end and JSON output](output.md)) |
 | stderr | all logs |
 | exit 0 | success |
-| exit 1 | generation failed ([`Program.cs` L90–94](../procgen-csharp/Program.cs#L90-L94)) |
-| exit 2 | invalid arguments ([`Program.cs` L9–13](../procgen-csharp/Program.cs#L9-L13)) |
+| exit 1 | generation failed ([`DungeonGenerator.cs` L29–33](../procgen-csharp/DungeonGenerator.cs#L29-L33)) |
+| exit 2 | invalid arguments ([`Program.cs` L8–12](../procgen-csharp/Program.cs#L8-L12)) |
 
 ## Benchmark mode
 
@@ -58,13 +58,13 @@ Everything below is printed to **stderr**, in order:
 |---|---|---|
 | 1 | `Generated 18 rooms in 35 attempts` (once per generation attempt) | [`RoomGeneration.cs` L28](../procgen-csharp/RoomGeneration.cs#L28) |
 | 2 | the reason, if a room set fails validation | [`Validation.cs`](../procgen-csharp/Validation.cs) |
-| 3 | `Valid rooms after N generation attempts` | [`Program.cs` L98](../procgen-csharp/Program.cs#L98) |
-| 4 | every room: id, position, size | [`Program.cs` L98](../procgen-csharp/Program.cs#L98), [`Room.ToString`](../procgen-csharp/Room.cs#L26-L29) |
-| 5 | `Generated 153 edges`, then every edge with its weight | [`Program.cs` L105–108](../procgen-csharp/Program.cs#L105-L108), [`Edge.ToString`](../procgen-csharp/Edge.cs#L11-L14) |
-| 6 | `Backbone has 17 edges`, then every tree edge | [`Program.cs` L114–117](../procgen-csharp/Program.cs#L114-L117) |
-| 7 | every door with its walls, e.g. `Door 0-15: bottom/top` | [`Program.cs` L123–126](../procgen-csharp/Program.cs#L123-L126), [`Door.ToString`](../procgen-csharp/Door.cs#L21-L24) |
-| 8 | `Start room 0, end room 6 (12 doors away)` | [`Program.cs` L136](../procgen-csharp/Program.cs#L136) |
-| 9 | the kind of every room, e.g. `Room 3 is Enemy` | [`Program.cs` L143–146](../procgen-csharp/Program.cs#L143-L146) |
+| 3 | `Valid rooms after N generation attempts` | [`DungeonGenerator.cs` L37](../procgen-csharp/DungeonGenerator.cs#L37) |
+| 4 | every room: id, position, size | [`DungeonGenerator.cs` L37](../procgen-csharp/DungeonGenerator.cs#L37), [`Room.ToString`](../procgen-csharp/Room.cs#L26-L29) |
+| 5 | `Generated 153 edges`, then every edge with its weight | [`DungeonGenerator.cs` L44–47](../procgen-csharp/DungeonGenerator.cs#L44-L47), [`Edge.ToString`](../procgen-csharp/Edge.cs#L11-L14) |
+| 6 | `Backbone has 17 edges`, then every tree edge | [`DungeonGenerator.cs` L53–56](../procgen-csharp/DungeonGenerator.cs#L53-L56) |
+| 7 | every door with its walls, e.g. `Door 0-15: bottom/top` | [`DungeonGenerator.cs` L62–65](../procgen-csharp/DungeonGenerator.cs#L62-L65), [`Door.ToString`](../procgen-csharp/Door.cs#L21-L24) |
+| 8 | `Start room 0, end room 6 (12 doors away)` | [`DungeonGenerator.cs` L75](../procgen-csharp/DungeonGenerator.cs#L75) |
+| 9 | the kind of every room, e.g. `Room 3 is Enemy` | [`DungeonGenerator.cs` L82–85](../procgen-csharp/DungeonGenerator.cs#L82-L85) |
 | 10 | the reason, if population validation fails (then exit 1) | [`Population.ValidatePopulation`](../procgen-csharp/Population.cs#L138-L180) |
 
 On **stdout** comes only the dungeon JSON. To see just the JSON, or just the logs:
